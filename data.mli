@@ -17,7 +17,8 @@ type b_location =
 type b_type  =
 	| Cue
 	| Solid of int
-	| Stripe of int
+  | Stripe of int
+  | Black
 
 type b_color = Red | Blue | Green
 
@@ -26,7 +27,7 @@ type ball = {
 	group			: b_type ;
 	color 		: b_color;
 	location  : b_location;
-	number 		: int;
+	name 		: string;
 	velocity 	: float * float;
 	}
 
