@@ -1,60 +1,10 @@
 include Data
 
-type status =
-  |Playing
-  |Won
-  |Lost
-
-(*Assumed implementation of state of eight ball, should be
-  imported from another class*)
-type player = {
-  id: int; (*current player this turn*)
-  group: b_type; (*stripes or solids*)
-  (*List of balls left to sink other than the 8 ball.
-    Contains all balls except cue and 8 if break = true*)
-  balls_left : ball list;
-  status : status; (**)
-}
-
-(*Assumed implementation of gamestate of eight ball, should be
-imported from another class*)
-type state = {
-  player: player; (*current player this turn*)
-  other_player: player; (*the other player, which is the current player if 1p mode*)
-  break: boolean; (*whether the game just started and the table is open*)
-  scratch: boolean; (*whether the player fouled*)
-  continue: boolean; (*Whether the player just sunk a ball of his type*)
-  game_over: boolean; (*whether the game ended*)
-}
-
-(*Assumed implementation of state of eight ball, should be
-imported from another class*)
-type event =
-| None (* Done *)
-| Hit of ball (* Cue ball contacts another ball*)
-| Sink of ball (* A ball sinks, the cue ball does not have to have contacted it*)
-
 (*get the next player to take a turn given the state and current player*)
 let next_turn (s:state) : state =
-  (* if (s.scratch)
-  then {
-    player = s.other_player; (*players change*)
-    other_player = s.player; (*players change*)
-    break = s.break; (*player does not change*)
-    scratch = s.scratch; (*if the first ball is not your own ball*)
-    continue = false; (*next player has to sink their balls to continue*)
-    game_over = s.game_over; (*player does not change*)
-  }
-  else if (s.break)
-  then {
-    player = s.other_player; (*players change*)
-    other_player = s.player; (*players change*)
-    break = s.break; (*player does not change*)
-    scratch = s.scratch; (*if the first ball is not your own ball*)
-    continue = false; (*next player has to sink their balls to continue*)
-    game_over = s.game_over; (*player does not change*)
-  } *)
-  if (s.scratch || not s.continue)
+  if (s.other_player.id = s.player.id)
+  then s
+  else if (s.scratch || not s.continue)
   then {
     player = s.other_player; (*players change*)
     other_player = s.player; (*players change*)
@@ -120,8 +70,6 @@ let resolve_sink (s:state) (b:ball) : state =
           status = Lost;
         };
     other_player =
-      if (other_player <> player)
-      then
         if (p.balls_left = [])
         then {
           id = p.id;
@@ -133,8 +81,7 @@ let resolve_sink (s:state) (b:ball) : state =
           group = p.group;
           balls_left = p.balls_left;
           status = Won;
-        }
-      else p.other_player; (*TODO decide*)
+        };
     break = s.break; (*break does not change*)
     scratch = s.scratch; (*scratch does not change*)
     continue = s.continue; (*continue does not change*)
@@ -145,7 +92,7 @@ let resolve_sink (s:state) (b:ball) : state =
     player =
       let p = s.player in {
         id = p.id;
-        group = p.group;
+        group = b.group; (*set group to be ball's group*)
         balls_left =
           remove_ball b
             (List.filter (fun x -> x.group = b.group) p.balls_left);
@@ -180,9 +127,20 @@ let resolve_sink (s:state) (b:ball) : state =
     continue = true; (*sunk a good ball!*)
     game_over = s.game_over; (*player does not change*)
   }
-  else (*must be sink ball of other person*){
-
-  }
+  else (*must have sunk ball of other person*){
+    player = s.player;
+    other_player =
+      let p = s.other_player in {
+        id = p.id;
+        group = p.group;
+        balls_left = remove_ball b p.balls_left; (*1 less ball*)
+        status = p.status;
+      }; (*other player doesn't change*)
+    break = s.break; (*player does not change*)
+    scratch = s.scratch; (*if the first ball is not your own ball, scratch*)
+    continue = s.continue; (*sunk a good ball!*)
+    game_over = s.game_over; (*player does not change*)
+    }
 
 (*returns the next state of the game
  *inputs: initial state and list of events this turn

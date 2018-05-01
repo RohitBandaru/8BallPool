@@ -1,9 +1,3 @@
-(* [state] is an abstract type representing the game state. *)
-type state
-
-(* [player] is an abstract type representing a player in the game *)
-type player
-
 (* [game_type] is the game mode default Eight-ball *)
 type game_type = EightBall
 
@@ -30,6 +24,41 @@ type ball = {
 	name 		: string;
 	velocity 	: float * float;
 	}
+
+(*[status] is a type representing the state of the player, whether
+they are currently playing, won, or lost the game. *)
+type status =
+  |Playing
+  |Won
+  |Lost
+
+(* [player] is a type representing a player in the game *)
+type player = {
+  id: int; (*current player this turn*)
+  group: b_type;(*stripes or solids*)
+  (*List of balls left to sink other than the 8 ball.
+    Contains all balls except cue and 8 if break = true*)
+  balls_left : ball list;
+  status : status; (* playing, won lost*)
+}
+
+(* [state] is a type representing the game state. *)
+type state = {
+  player: player; (*current player this turn*)
+  other_player: player; (*the other player, which is the current player if 1p mode*)
+  break: boolean; (*whether the game just started and the table is open*)
+  scratch: boolean; (*whether the player fouled*)
+  continue: boolean; (*Whether the player just sunk a ball of his type*)
+  game_over: boolean; (*whether the game ended*)
+}
+
+
+(*[event] is the type*)
+type event =
+  | None (* Done *)
+  | Hit of ball (* Cue ball contacts another ball*)
+  | Sink of ball (* A ball sinks, the cue ball does not have to have contacted it*)
+
 
 (* [move] representing *)
 type move =
