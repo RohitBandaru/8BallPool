@@ -1,8 +1,3 @@
-(* [state] is an abstract type representing the game state. *)
-type state
-
-(* [player] is an abstract type representing a player in the game *)
-type player
 
 (* [game_type] is the game mode default Eight-ball *)
 type game_type = EightBall
@@ -14,7 +9,7 @@ type b_location =
 
 (* [ball] is a record type representing of a pool ball *)
 
-type b_type  =
+type b_group  =
 	| Cue
 	| Solid of int
 	| Stripe of int
@@ -23,18 +18,37 @@ type b_color = Red | Blue | Green
 
 type ball = {
 	id 				: int;
-	group			: b_type ;
+	number 		: int;
+	group			: b_group;
 	color 		: b_color;
 	location  : b_location;
-	number 		: int;
 	velocity 	: float * float;
 	}
 
+
+(* [player] is an abstract type representing a player in the game *)
+type player = {
+	name			: string;
+	points		: int;
+	group			: b_group;
+}
+
+(* [state] is an abstract type representing the game state. *)
+type state = {
+
+	(* [mode] is the game type in play *)
+	mode 		: game_type;
+
+	(* [balls] is an assoc list of all active balls in play in the format (id, ball) *)
+	balls 	: (int * ball) list;
+
+	(* [players] is a list of all the players (either 1 or 2 players) *)
+	players : player list;
+}
+
+
 (* [move] representing *)
-type move =
-	| None
-	| Move of { player:player; velocity:(float*float) }
-	| Place of b_location
+type move = { player:player; velocity:(float*float) }
 
 (* [init_state s] is the initial state of the pool game given a game_type
 	It will initialize a game state taking into account different variables
