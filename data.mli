@@ -43,11 +43,10 @@ val init_state : game_type -> state
 
 (* [ball_locations s] is a list of pool balls and their corresponding locations
  at a given game state. *)
-val ball_locations : state -> (ball*b_location)
+val ball_locations : state -> (ball * b_location)
 
 (* [cue_location s] is the current location of the cue ball *)
 val cue_location : state -> b_location
 
 (* [next s] is the next move that will take place *)
 val move : state -> move
-
