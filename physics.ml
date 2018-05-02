@@ -1,4 +1,5 @@
 open Ball
+open Printf
     
 type ball = Ball.t
 
@@ -21,12 +22,16 @@ let collide t1 t2 =
   let (x1, y1) = Ball.get_position t1 in
   let (x2, y2) = Ball.get_position t2 in
   let dy, dx = (y1 -. y2, x1 -. x2) in
-  let tangent_angle = atan2 dy dx in
-  let norm_angle = 90.0 -. tangent_angle in
+  (*let tangent_angle = atan2 dy dx in
+  let norm_angle = 3.1415926 /. 2.0 -. tangent_angle in
+  *)
+  let norm_angle = atan2 dy dx in
+
   (* We only care about the velocity perpendicular to the tangent *)
   let norm_vector = (dx, dy) in
   let norm_vector = (dx /. norm norm_vector, dy /. norm norm_vector) in
   let tan_vector = (-.dy /. norm norm_vector, dx /. norm norm_vector) in
+  let tangent_angle = atan2 (dx)(-. dy) in
   
   (* Velocity of ball 1, normal coordinates, before *)
   let v1nb = dot (Ball.get_velocity t1) (norm_vector) in
@@ -44,13 +49,26 @@ let collide t1 t2 =
   let v2na = (v2nb *. (m2 -. m1) +. 2.0 *. m1 *. v1nb) /. (m1 +. m2) in
   (* Velocity of ball 1, cartesian coordinates, after *)
   let v1ca = (v1t *. cos tangent_angle +. v1na *. cos norm_angle,
-              v1t *. sin tangent_angle +. v1na *. sin tangent_angle)
+              v1t *. sin tangent_angle +. v1na *. sin norm_angle)
             
   in
   (* Velocity of ball 2, cartesian coordinates, after *)
   let v2ca = (v2t *. cos tangent_angle +. v2na *. cos norm_angle,
-              v2t *. sin tangent_angle +. v2na *. sin tangent_angle)
+              v2t *. sin tangent_angle +. v2na *. sin norm_angle)
   in
+  
+  (*print_float dy;
+    print_float dx;*)
+  (*
+  printf "Normal vector: %f %f\n" dx dy;
+
+  printf "Tangent vector: %f %f\n" (-.dy) dx;
+  printf "Tangent angle: %f\n" tangent_angle;
+  printf "v1t: %f\n" v1t;
+  printf "v1ca (%s): %f %f\n" (Ball.get_name t1) (v1ca |> fst) (v1ca |> snd);
+  printf "v2ca (%s): %f %f\n" (Ball.get_name t2) (v2ca |> fst) (v2ca |> snd);
+*)
+     
   (Ball.change_velocity t1 v1ca, Ball.change_velocity t2 v2ca)
 
 
