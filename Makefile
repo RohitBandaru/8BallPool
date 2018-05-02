@@ -23,6 +23,9 @@ test:
 physics:
 	ocamlbuild -use-ocamlfind test_physics.byte && ./test_physics.byte
 
+8b:
+	ocamlbuild -use-ocamlfind test_eightball.byte && ./test_eightball.byte
+
 # # clean:
 # # 	ocamlbuild -clean
 # # 	rm -f a4src.zip

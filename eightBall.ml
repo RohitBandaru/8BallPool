@@ -16,20 +16,26 @@ let next_turn (s:logic_state) : logic_state =
   let resolve_hit (s:logic_state) (b:ball) : logic_state =
     if (s.break) then s (*if in break hitting any ball is fine*)
     else if (*if ball hit is in legal balls to hit*)
-      (List.exists (fun x -> x = b) s.player.balls_left)
+      (List.exists (fun x -> fst x = get_id b) s.player.balls_left)
     then {s with scratch = false;}
     else {s with scratch = true;}
 
 (*remove a ball from the list of balls*)
-let remove_ball (b : ball) (l: ball list) : ball list =
-  List.filter (fun x -> x.id <> b.id) l
+let remove_ball (b : ball) (l: (int * b_type) list) : (int * b_type) list =
+  List.filter (fun x -> fst x <> get_id b) l
+
+let opposite_group (g:b_type) : b_type =
+  match g with
+  | Stripe -> Solid
+  | Solid -> Stripe
+  | _ -> failwith  "impossible"
 
 (*resolve the ball sinking in a pocket
   Only called for first ball hit each turn*)
 let resolve_sink (s:logic_state) (b:ball) : logic_state =
-  if (b.group = Cue)
+  if (get_type b = Cue)
     then {s with scratch = true;}
-  else if (b.group = Black) (*Sinking eight ball*)
+  else if (get_type b = Black) (*Sinking eight ball*)
     then
       let p = s.player in
         {s with
@@ -46,36 +52,32 @@ let resolve_sink (s:logic_state) (b:ball) : logic_state =
   then
     {s with
     player =
-      let p = s.player in
-      {p with
-        group = b.group; (*set group to be ball's group*)
+      {s.player with
+        group = get_type b; (*set group to be ball's group*)
         balls_left =
           remove_ball b
-            (List.filter (fun x -> x.group = b.group) p.balls_left);
-        status = p.status;
+            (List.filter (fun x -> snd x = get_type b) s.player.balls_left);
+        status = s.player.status;
       }; (*player just picked a side*)
     other_player =
-      let p = s.other_player in
-      {p with
-        group = b.group; (*set group to be ball's group*)
+      {s.other_player with
+       group = opposite_group (get_type b); (*set group to be opposite ball's group*)
         balls_left =
           remove_ball b
-            (List.filter (fun x -> x.group = b.group) p.balls_left); (*remove all balls of type not matching*)
-      } (*Opponent takes other side*)
+            (List.filter (fun x -> snd x = get_type b) s.other_player.balls_left); (*remove all balls of type not matching*)
+      }; (*Opponent takes other side*)
     break = false; (*player just sunk valid ball*)
     continue = true; (*player just sunk valid ball*)
   }
-  else if (b.group = s.player.group)  (*sink own ball*)
+  else if (get_type b = s.player.group)  (*sink own ball*)
   then {
     s with
       player =
-        let p = s.player in
-          {p with balls_left = remove_ball b p.balls_left;}; (*1 less ball to sink*)
+          {s.player with balls_left = remove_ball b s.player.balls_left;}; (*1 less ball to sink*)
       continue = true;}(*sunk a good ball!*)
   else (*must have sunk ball of other person*)
     {s with other_player =
-      let p = s.other_player in
-        {p with balls_left = remove_ball b p.balls_left;};}
+        {s.other_player with balls_left = remove_ball b s.other_player.balls_left;};}
 
 (*returns the next state of the game
  *inputs: initial state and list of events this turn
@@ -100,7 +102,7 @@ let resolve_sink (s:logic_state) (b:ball) : logic_state =
   | h :: t -> match h with
               | None -> step_state is t
               | Hit b -> step_state (resolve_hit is b) t
-              | Sink b -> if (b.group = Cue) then
+              | Sink b -> if (get_type b = Cue) then
                   (*literally scratch is the only possibility*)
                   step_state (next_turn {is with scratch = true;}) t
                 else failwith "Impossible to sink without hitting first"
