@@ -12,4 +12,10 @@ module type Ball = sig
 
   (* [get_name t] returns the friendly name of the ball *)
   val get_name: t -> string
+
+  (* [get_momentum t] returns a vector representingthe momentum of the ball *)
+  val get_momentum: t -> float * float
+
+  (* [get_velocity t] returns a vector representing the velocity of the ball *)
+  val get_velocity: t -> float * float
 end
