@@ -13,12 +13,17 @@ let brdr_color = jstr "#af7418"
 let pool_color = jstr "#0a6c03"
 let ball_color = jstr "white"
 
+let stripe_color = jstr "#22A7F0"
+let solid_color = jstr "#C3272B"
+
 let init_pos = eight_ball_init_ball_pos
 
 let test_ball =
   match init_pos with
   | [] -> failwith "Empty"
   | h::t -> h
+
+let (tbx, tby) = get_position test_ball
 
 let draw_background canvas =
   let ctx = canvas##getContext (Html._2d_) in
@@ -39,20 +44,22 @@ let draw_board canvas =
     ctx##fillRect 0. (ch-.border_rad) cw border_rad;
     ctx##fillRect (cw-.border_rad) 0. border_rad ch
 
-let draw_ball canvas off =
+let draw_ball canvas ball off =
   let ctx = canvas##getContext (Html._2d_) in
-    let bx = 128. in
-    let by = 128. in
+    let (bx, by) = get_position ball in
     let brad = 11.4 in
     ctx##beginPath;
     ctx##arc bx by brad 0. (2.0*.pi) Js._true;
     ctx##.fillStyle := ball_color;
     ctx##fill
 
+let draw_state canvas =
+  List.iter (fun b -> draw_ball canvas b 0. ) init_pos
+
 let draw canvas off =
   draw_background canvas;
   draw_board canvas;
-  draw_ball canvas off;
+  draw_state canvas;
   ()
 
 let rec start _ =

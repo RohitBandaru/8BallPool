@@ -62,13 +62,13 @@ let init_player: player = {
   status = Playing;
 }
 
-let width = 256. (*cm*)
-let height = 128. (*cm*)
+let width = 1024. (*cm*)
+let height = 512. (*cm*)
 let weight = 0.156 (*kg*)
-let radius = 2.85 (*cm*)
+let radius = 11.4 (*cm*)
 let init_vel = (0.,0.) (*cm*)
 
-let sq32 = radius *. (sqrt 3.) /. 2.
+let sq32 = radius *. (sqrt 3.)
 
 let eight_ball_init_ball_pos =
   (*TODO add stripe/solid/cue/black to constructor after updated in ball.ml*)
