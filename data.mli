@@ -1,40 +1,71 @@
-(* [state] is an abstract type representing the game state. *)
-type state
-
-(* [player] is an abstract type representing a player in the game *)
-type player
+open Ball
 
 (* [game_type] is the game mode default Eight-ball *)
-type game_type = EightBall
+type game_type =
+  |EightBallSolo
+  |EightBallTwoP
 
-(* [location] is a variant type representing the location of a pool ball *)
-type b_location =
-	| Sunk
-	| Table of (float * float)
+(*[status] is a type representing the state of the player, whether
+they are currently playing, won, or lost the game. *)
+type status =
+  |Playing
+  |Won
+  |Lost
 
-(* [ball] is a record type representing of a pool ball *)
+(* [player] is a type representing a player in the game *)
+type player = {
+  id: int; (*current player this turn*)
+  group: b_type;(*stripes or solids*)
+  (*List of balls left to sink other than the 8 ball.
+    Contains all balls except cue and 8 if break = true
+  Stored as ball id by ball type*)
+  balls_left : (int * b_type) list;
+  status : status; (* playing, won lost*)
+}
 
-type b_type  =
-	| Cue
-	| Solid of int
-	| Stripe of int
+(* [logic_state] is a type representing the game's logical state. *)
+type logic_state = {
+  player: player; (*current player this turn*)
+  other_player: player; (*the other player, which is the current player if 1p mode*)
+  break: bool; (*whether the game just started and the table is open*)
+  scratch: bool; (*whether the player fouled*)
+  continue: bool; (*Whether the player just sunk a ball of his type*)
+  game_over: bool; (*whether the game ended*)
+}
 
-type b_color = Red | Blue | Green
+(* [state] is a type representing the game state. *)
+type state = logic_state * (ball list)
 
-type ball = {
-	id 				: int;
-	group			: b_type ;
-	color 		: b_color;
-	location  : b_location;
-	number 		: int;
-	velocity 	: float * float;
-	}
+(*[event] is the type*)
+type event =
+  | None (* Done *)
+  | Hit of ball (* Cue ball contacts another ball*)
+  | Sink of ball (* A ball sinks, the cue ball does not have to have contacted it*)
+
+
+(* [player] is an abstract type representing a player in the game *)
+type player = {
+	name			: string;
+	points		: int;
+	group			: b_group;
+}
+
+(* [state] is an abstract type representing the game state. *)
+type state = {
+
+	(* [mode] is the game type in play *)
+	mode 		: game_type;
+
+	(* [balls] is an assoc list of all active balls in play in the format (id, ball) *)
+	balls 	: (int * ball) list;
+
+	(* [players] is a list of all the players (either 1 or 2 players) *)
+	players : player list;
+}
+
 
 (* [move] representing *)
-type move =
-	| None
-	| Move of { player:player; velocity:(float*float) }
-	| Place of b_location
+type move = { player:player; velocity:(float*float) }
 
 (* [init_state s] is the initial state of the pool game given a game_type
 	It will initialize a game state taking into account different variables
@@ -43,11 +74,7 @@ val init_state : game_type -> state
 
 (* [ball_locations s] is a list of pool balls and their corresponding locations
  at a given game state. *)
-val ball_locations : state -> (ball*b_location)
-
-(* [cue_location s] is the current location of the cue ball *)
-val cue_location : state -> b_location
+val ball_locations : state -> ball list
 
 (* [next s] is the next move that will take place *)
 val move : state -> move
-

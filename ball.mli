@@ -1,3 +1,9 @@
+(*The possible types of balls*)
+type b_type  =
+  | Cue
+  | Solid
+  | Stripe
+  | Black
 
 (* A Ball stores information about a given ball. *)
 (* t represents an instance of a ball *)
@@ -28,5 +34,4 @@ val get_radius: t -> float
    with velocity set to [v] *)
 val change_velocity: t -> float * float -> t
 
-val create_ball: string -> string -> float * float -> float * float -> float -> float -> t
-  
+val create_ball: string -> string -> b_type -> string -> float * float -> float * float -> float -> float -> t
