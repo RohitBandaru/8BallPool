@@ -15,6 +15,9 @@ let dot v1 v2 =
   match v1, v2 with
   | ((v1x, v1y), (v2x, v2y)) -> v1x *. v2x +. v1y *. v2y
 
+(* diff (a1, a2), (b1, b2) is (a1-b1, a2-b2) *)
+let diff (a1,a2) (b1,b2) = (a1-.b1, a2-.b2)
+
 let norm v1 = (dot v1 v1) ** 0.5
 
 let collide t1 t2 =
@@ -68,8 +71,15 @@ let collide t1 t2 =
   printf "v1ca (%s): %f %f\n" (Ball.get_name t1) (v1ca |> fst) (v1ca |> snd);
   printf "v2ca (%s): %f %f\n" (Ball.get_name t2) (v2ca |> fst) (v2ca |> snd);
 *)
-     
-  (Ball.change_velocity t1 v1ca, Ball.change_velocity t2 v2ca)
+  (diff (Ball.get_velocity t1) v1ca, diff (Ball.get_velocity t2) v2ca)
+(* (Ball.change_velocity t1 v1ca, Ball.change_velocity t2 v2ca)*)
 
 
+let simulate_timestep ball_list ts =
+  (* First, we move everything at once. 
+     Then, handle all collisions, adding the new velocities to an accumulator.
+     Then, shift everybody who collided by their velocity * ts...or something.
+     Return (updated list, list of interesting events this timestep)
+  *)
   
+cc
