@@ -35,7 +35,7 @@ type event =
 type move =
   | None
   | Move of { player:player; velocity:(float*float) }
-  | Place of b_location
+  | Place of (float * float)
 
 
 let init_player: player = {
@@ -111,5 +111,5 @@ let init_state (g:game_type) : state =
 
 let ball_locations (s:state) : ball list = snd s
 
-let move (s:state) : move =
+let next (s:state) : move =
   failwith "Unimplemented"
