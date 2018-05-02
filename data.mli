@@ -36,7 +36,7 @@ type logic_state = {
 (* [state] is a type representing the game state. *)
 type state = logic_state * (ball list)
 
-(*[event] is the type*)
+(*[event] is the game logic actions that can occur in a game*)
 type event =
   | None (* Done *)
   | Hit of ball (* Cue ball contacts another ball*)
