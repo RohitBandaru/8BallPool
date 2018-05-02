@@ -45,9 +45,6 @@ type event =
   | Sink of ball (* A ball sinks, the cue ball does not have to have contacted it*)
 
 
-(* [move] representing *)
-type move = { player:player; velocity:(float*float) }
-
 (* [init_state s] is the initial state of the pool game given a game_type
 	It will initialize a game state taking into account different variables
 	such as number of balls, game rules, cue type etc. *)

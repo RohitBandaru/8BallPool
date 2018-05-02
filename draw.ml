@@ -1,4 +1,8 @@
+open Data
+open Ball
+
 module Html = Dom_html
+
 let jstr = Js.string
 let document = Html.window##.document
 
@@ -8,6 +12,13 @@ let bg_color = jstr "#BDC3C7"
 let brdr_color = jstr "#af7418"
 let pool_color = jstr "#0a6c03"
 let ball_color = jstr "white"
+
+let init_pos = eight_ball_init_ball_pos
+
+let test_ball =
+  match init_pos with
+  | [] -> failwith "Empty"
+  | h::t -> h
 
 let draw_background canvas =
   let ctx = canvas##getContext (Html._2d_) in
@@ -30,7 +41,7 @@ let draw_board canvas =
 
 let draw_ball canvas off =
   let ctx = canvas##getContext (Html._2d_) in
-    let bx = 128. +. off in
+    let bx = 128. in
     let by = 128. in
     let brad = 11.4 in
     ctx##beginPath;
@@ -66,37 +77,3 @@ let rec start _ =
 
 let _ =
   Html.window##.onload := Html.handler (fun _ -> start (); Js._true);
-
-
-  (*
-
-  Dom.appendChild main
-    (button "reset" main);
-
-
-  let _ = Html.addEventListener
-      document Html.Event.keydown (Html.handler keyup)
-  in
-
-let button name main =
-  let res = document##createDocumentFragment in
-  let input = Html.createInput ~_type:(jstr "submit") document in
-  input##.value := jstr name;
-  input##.onclick := Html.handler (fun _ ->
-          let div = Html.createDiv document in
-          Dom.appendChild main div;
-          Js._false);
-  Dom.appendChild res input;
-  res
-
-
-let keyup event =
-  let () = match event##keyCode with
-    | 83 -> ()
-    | _ -> ()
-  in Js._true
-
->>>>>>> f4e137e7a90b7098a8d51ca8c0936c36431c7bc6
-
-
-  *)

@@ -16,6 +16,8 @@ type player = {
   status : status;
 }
 
+type ball = t
+
 type logic_state = {
   player: player;
   other_player: player;
@@ -35,7 +37,7 @@ type event =
 type move =
   | None
   | Move of { player:player; velocity:(float*float) }
-  | Place of b_location
+  | Place of float * float
 
 
 let init_player: player = {
@@ -70,22 +72,22 @@ let sq32 = radius *. (sqrt 3.) /. 2.
 
 let eight_ball_init_ball_pos =
   (*TODO add stripe/solid/cue/black to constructor after updated in ball.ml*)
-  [create_ball "Cue" 0 init_vel Cue "" (width *. 3. /. 4., height /. 2.) weight radius; (*Cue*)
-   create_ball "9" 9 init_vel Stripe "" (width /. 4. -. (2. *. sq32), height /. 2.) weight radius; (*Stripe*)
-   create_ball "7" 7 init_vel Solid "" (width /. 4. -. sq32, height /. 2. -. radius) weight radius; (*Solid*)
-   create_ball "12" 12 init_vel Stripe "" (width /. 4. -. sq32, height /. 2. +. radius) weight radius; (*Stripe*)
-   create_ball "15" 15 init_vel Stripe "" (width /. 4., height /. 2. -. (2. *. radius)) weight radius; (*Stripe*)
-   create_ball "8" 8 init_vel Eight "" (width /. 4., height /. 2.) weight radius; (*Eight*)
-   create_ball "1" 1 init_vel Solid "" (width /. 4., height /. 2. +. (2. *. radius)) weight radius; (*Solid*)
-   create_ball "6" 6 init_vel Solid "" (width /. 4. +. sq32, height /. 2. -. (3. *. radius)) weight radius; (*Solid*)
-   create_ball "10" 10 init_vel Stripe "" (width /. 4. +. sq32, height /. 2. -. radius) weight radius; (*Stripe*)
-   create_ball "3" 3 init_vel Solid "" (width /. 4. +. sq32, height /. 2. +. radius) weight radius; (*Solid*)
-   create_ball "14" 14 init_vel Stripe "" (width /. 4. +. sq32, height /. 2. +. (3. *. radius)) weight radius; (*Stripe*)
-   create_ball "11" 11 init_vel Stripe "" (width /. 4. +. (2. *. sq32), height /. 2. -. (4. *. radius)) weight radius; (*Stripe*)
-   create_ball "2" 2 init_vel Solid "" (width /. 4. +. (2. *. sq32), height /. 2. -. (2. *. radius)) weight radius; (*Solid*)
-   create_ball "13" 13 init_vel Stripe "" (width /. 4. +. (2. *. sq32), height /. 2.) weight radius; (*Stripe*)
-   create_ball "4" 4 init_vel Solid "" (width /. 4. +. (2. *. sq32), height /. 2. +. (2. *. radius)) weight radius; (*Solid*)
-   create_ball "5" 5 init_vel Solid "" (width /. 4. +. (2. *. sq32), height /. 2. +. (4. *. radius)) weight radius; (*Solid*)
+  [create_ball "Cue" 0  Cue "" init_vel (width *. 3. /. 4., height /. 2.) weight radius; (*Cue*)
+   create_ball "9" 9  Stripe "" init_vel (width /. 4. -. (2. *. sq32), height /. 2.) weight radius; (*Stripe*)
+   create_ball "7" 7  Solid "" init_vel (width /. 4. -. sq32, height /. 2. -. radius) weight radius; (*Solid*)
+   create_ball "12" 12  Stripe "" init_vel (width /. 4. -. sq32, height /. 2. +. radius) weight radius; (*Stripe*)
+   create_ball "15" 15  Stripe "" init_vel (width /. 4., height /. 2. -. (2. *. radius)) weight radius; (*Stripe*)
+   create_ball "8" 8  Black "" init_vel (width /. 4., height /. 2.) weight radius; (*Eight*)
+   create_ball "1" 1  Solid "" init_vel (width /. 4., height /. 2. +. (2. *. radius)) weight radius; (*Solid*)
+   create_ball "6" 6  Solid "" init_vel (width /. 4. +. sq32, height /. 2. -. (3. *. radius)) weight radius; (*Solid*)
+   create_ball "10" 10  Stripe "" init_vel (width /. 4. +. sq32, height /. 2. -. radius) weight radius; (*Stripe*)
+   create_ball "3" 3  Solid "" init_vel (width /. 4. +. sq32, height /. 2. +. radius) weight radius; (*Solid*)
+   create_ball "14" 14  Stripe "" init_vel (width /. 4. +. sq32, height /. 2. +. (3. *. radius)) weight radius; (*Stripe*)
+   create_ball "11" 11  Stripe "" init_vel (width /. 4. +. (2. *. sq32), height /. 2. -. (4. *. radius)) weight radius; (*Stripe*)
+   create_ball "2" 2  Solid "" init_vel (width /. 4. +. (2. *. sq32), height /. 2. -. (2. *. radius)) weight radius; (*Solid*)
+   create_ball "13" 13  Stripe "" init_vel (width /. 4. +. (2. *. sq32), height /. 2.) weight radius; (*Stripe*)
+   create_ball "4" 4  Solid "" init_vel (width /. 4. +. (2. *. sq32), height /. 2. +. (2. *. radius)) weight radius; (*Solid*)
+   create_ball "5" 5  Solid "" init_vel (width /. 4. +. (2. *. sq32), height /. 2. +. (4. *. radius)) weight radius; (*Solid*)
   ]
 
 let init_state (g:game_type) : state =
