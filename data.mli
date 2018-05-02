@@ -1,35 +1,9 @@
+open Ball
+
 (* [game_type] is the game mode default Eight-ball *)
 type game_type =
   |EightBallSolo
   |EightBallTwoP
-
-(******************************************************************************************)
-(*TODO Handle in ball.ml*)
-
-(* [location] is a variant type representing the location of a pool ball *)
-type b_location =
-	| Sunk
-	| Table of (float * float)
-
-(* [ball] is a record type representing of a pool ball *)
-
-type b_type  =
-  | Cue
-	| Solid
-  | Stripe
-  | Black
-
-type ball = {
-	id 				: int;
-	group			: b_type ;
-  color 		: string; (*hex value for rgb?*)
-	location  : b_location;
-	name 		  : string;
-	velocity 	: float * float;
-	}
-
-
-(******************************************************************************************)
 
 (*[status] is a type representing the state of the player, whether
 they are currently playing, won, or lost the game. *)
