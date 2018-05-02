@@ -1,4 +1,4 @@
-include Data
+open Data
 
 (*get the next player to take a turn given the state and current player*)
 let next_turn (s:state) : state =
