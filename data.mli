@@ -42,11 +42,11 @@ type event =
   | Hit of ball (* Cue ball contacts another ball*)
   | Sink of ball (* A ball sinks, the cue ball does not have to have contacted it*)
 
-(* [move] representing *)
+(* [move] representing the possible actions the player can take*)
 type move =
 	| None
 	| Move of { player:player; velocity:(float*float) }
-	| Place of b_location
+  | Place of (float * float)
 
 (* [init_state s] is the initial state of the pool game given a game_type
 	It will initialize a game state taking into account different variables

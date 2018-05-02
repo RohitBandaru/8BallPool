@@ -75,7 +75,7 @@ let eight_ball_init_ball_pos =
    create_ball "7" 7 init_vel Solid "" (width /. 4. -. sq32, height /. 2. -. radius) weight radius; (*Solid*)
    create_ball "12" 12 init_vel Stripe "" (width /. 4. -. sq32, height /. 2. +. radius) weight radius; (*Stripe*)
    create_ball "15" 15 init_vel Stripe "" (width /. 4., height /. 2. -. (2. *. radius)) weight radius; (*Stripe*)
-   create_ball "8" 8 init_vel Eight "" (width /. 4., height /. 2.) weight radius; (*Eight*)
+   create_ball "8" 8 init_vel Black "" (width /. 4., height /. 2.) weight radius; (*Eight*)
    create_ball "1" 1 init_vel Solid "" (width /. 4., height /. 2. +. (2. *. radius)) weight radius; (*Solid*)
    create_ball "6" 6 init_vel Solid "" (width /. 4. +. sq32, height /. 2. -. (3. *. radius)) weight radius; (*Solid*)
    create_ball "10" 10 init_vel Stripe "" (width /. 4. +. sq32, height /. 2. -. radius) weight radius; (*Stripe*)
