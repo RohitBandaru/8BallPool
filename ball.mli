@@ -13,7 +13,7 @@ type t
 val get_mass: t -> float
 
 (* [get_id t] returns the unique id that identifies this ball *)
-val get_id: t -> string
+val get_id: t -> int
 
 (* [get_name t] returns the friendly name of the ball *)
 val get_name: t -> string
@@ -41,4 +41,4 @@ val get_radius: t -> float
 val change_velocity: t -> float * float -> t
 
 (* [create_ball name id group color velocity position mass radius] creates a new ball*)
-val create_ball: string -> string -> b_type -> string -> float * float -> float * float -> float -> float -> t
+val create_ball: string -> int -> b_type -> string -> float * float -> float * float -> float -> float -> t

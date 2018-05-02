@@ -1,5 +1,7 @@
 open Ball
 
+type ball = t
+
 (* [game_type] is the game mode default Eight-ball *)
 type game_type =
   |EightBallSolo
@@ -42,12 +44,6 @@ type event =
   | Hit of ball (* Cue ball contacts another ball*)
   | Sink of ball (* A ball sinks, the cue ball does not have to have contacted it*)
 
-(* [move] representing the possible actions the player can take*)
-type move =
-	| None
-	| Move of { player:player; velocity:(float*float) }
-  | Place of (float * float)
-
 (* [init_state s] is the initial state of the pool game given a game_type
 	It will initialize a game state taking into account different variables
 	such as number of balls, game rules, cue type etc. *)
@@ -57,5 +53,4 @@ val init_state : game_type -> state
  at a given game state. *)
 val ball_locations : state -> ball list
 
-(* [next s] is the next move that will take place *)
-val move : state -> move
+val eight_ball_init_ball_pos : ball list
