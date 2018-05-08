@@ -83,7 +83,7 @@ let draw_stick canvas =
 
 let draw canvas off =
   draw_background canvas;
-  draw_ball canvas off;
+  draw_state canvas;
   draw_stick canvas;
   ()
 
@@ -92,8 +92,8 @@ let move canvas =
 
 let keydown canvas event =
   let () = match event##.keyCode with
-    |40 -> (* enter *)if (!power > 10.)
-      move canvas
+    |13 -> (* enter *)if (!power > 10.) then
+      move canvas;
     |37 -> stick_angle := !stick_angle -. 1.0;
       draw_stick canvas(* left *)
     |38 -> (* up *) if (!power < 100.) then power := !power +. 1.0;
