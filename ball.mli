@@ -35,3 +35,5 @@ val get_radius: t -> float
 val change_velocity: t -> float * float -> t
 
 val create_ball: string -> string -> b_type -> string -> float * float -> float * float -> float -> float -> t
+
+val update_position: t -> float -> t

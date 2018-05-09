@@ -35,6 +35,14 @@ let get_position t = t.position
 
 let change_velocity b v = {b with velocity = v}
 
+let change_position b p = {b with position = p}
+
+let update_position b ts =
+  let new_pos = match b.position, b.velocity with
+    | (x, y), (vx, vy) -> (x +. vx *. ts, y +. vy *. ts)
+  in
+  {b with position = new_pos}
+  
 let create_ball name id group color velocity position mass radius =
   {
     name; id; group; color; velocity; position; mass; radius

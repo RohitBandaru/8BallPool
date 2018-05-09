@@ -82,4 +82,9 @@ let simulate_timestep ball_list ts =
      Return (updated list, list of interesting events this timestep)
   *)
   
-cc
+  let moved_ball_list =
+    List.fold_left (fun acc x ->
+      (Ball.update_position x ts)::acc
+    ) [] ball_list
+  in
+  moved_ball_list
