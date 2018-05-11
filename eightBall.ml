@@ -64,7 +64,7 @@ let resolve_sink (s:logic_state) (b:ball) : logic_state =
        group = opposite_group (get_type b); (*set group to be opposite ball's group*)
         balls_left =
           remove_ball b
-            (List.filter (fun x -> snd x = get_type b) s.other_player.balls_left); (*remove all balls of type not matching*)
+            (List.filter (fun x -> snd x <> get_type b) s.other_player.balls_left); (*remove all balls of type not matching*)
       }; (*Opponent takes other side*)
     break = false; (*player just sunk valid ball*)
     continue = true; (*player just sunk valid ball*)
@@ -85,7 +85,7 @@ let resolve_sink (s:logic_state) (b:ball) : logic_state =
  *)
  let rec step_state (s:logic_state) (el:event list) : logic_state =
   match el with
-  | [] -> next_turn s
+  | [] | [None] -> {(next_turn s) with continue = false;}
   | h :: t -> match h with
               | None | Hit _ -> (*hitting other colored balls no longer matters*)
                       step_state s t
@@ -97,11 +97,11 @@ let resolve_sink (s:logic_state) (b:ball) : logic_state =
  *)
  let next_state (is:logic_state) (el:event list) : logic_state =
   match el with
-  | [] -> (*scratch if no balls hit*)
-      next_turn {is with scratch = true;}
+  | [] | [None] -> (*scratch if no balls hit*)
+      next_turn {is with scratch = true; continue = false;}
   | h :: t -> match h with
               | None -> step_state is t
-              | Hit b -> step_state (resolve_hit is b) t
+              | Hit b -> step_state (resolve_hit is b) t;
               | Sink b -> if (get_type b = Cue) then
                   (*literally scratch is the only possibility*)
                   step_state (next_turn {is with scratch = true;}) t
