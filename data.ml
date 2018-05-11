@@ -1,8 +1,7 @@
 open Ball
 
 type game_type =
-  |EightBallSolo
-  |EightBallTwoP
+  |EightBall
 
 type status =
   |Playing
@@ -22,6 +21,8 @@ type logic_state = {
   player: player;
   other_player: player;
   break: bool;
+  ob: int;
+  collide: bool;
   scratch: bool;
   continue: bool;
   game_over: bool;
@@ -30,7 +31,7 @@ type logic_state = {
 type state = logic_state * (ball list)
 
 type event =
-  | None
+  | Collide of ball
   | Hit of ball
   | Sink of ball
 
@@ -92,20 +93,13 @@ let eight_ball_init_ball_pos =
 
 let init_state (g:game_type) : state =
   match g with
-  | EightBallSolo ->
-    ({
-      player = init_player;
-      other_player = init_player;
-      break= true;
-      scratch= false;
-      continue= false;
-      game_over = false;
-    }, eight_ball_init_ball_pos)
-  | EightBallTwoP ->
+  | EightBall ->
     ({
       player = init_player;
       other_player = {init_player with id = 1};
       break= true;
+      ob = 0;
+      collide = false;
       scratch= false;
       continue= false;
       game_over = false;

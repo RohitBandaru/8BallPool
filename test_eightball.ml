@@ -49,6 +49,8 @@ let init_logic_state : logic_state = {
   player = init_player;
   other_player = init_other_player;
   break= true;
+  ob = 0;
+  collide = false;
   scratch= false;
   continue= false;
   game_over = false;
@@ -57,9 +59,6 @@ let init_logic_state : logic_state = {
 let collision_tests = [
   "null" >:: (fun _ ->
       assert_equal {init_logic_state with scratch = true; player = init_other_player; other_player = init_player} (next_state init_logic_state [])
-    );
-  "none" >:: (fun _ ->
-      assert_equal {init_logic_state with scratch = true; player = init_other_player; other_player = init_player} (next_state init_logic_state [None])
     );
   "break" >:: (fun _ ->
       assert_equal {init_logic_state with player = init_other_player; other_player = init_player} (next_state init_logic_state [Hit fifteen]) (*Since other_player = player*)

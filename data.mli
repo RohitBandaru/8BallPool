@@ -4,8 +4,7 @@ type ball = t
 
 (* [game_type] is the game mode default Eight-ball *)
 type game_type =
-  |EightBallSolo
-  |EightBallTwoP
+  |EightBall
 
 (*[status] is a type representing the state of the player, whether
 they are currently playing, won, or lost the game. *)
@@ -30,6 +29,8 @@ type logic_state = {
   player: player; (*current player this turn*)
   other_player: player; (*the other player, which is the current player if 1p mode*)
   break: bool; (*whether the game just started and the table is open*)
+  ob: int; (*the id of the current object ball (first ball hit that turn)*)
+  collide: bool; (*whether the object ball or cue ball hit a rail*)
   scratch: bool; (*whether the player fouled*)
   continue: bool; (*Whether the player just sunk a ball of his type*)
   game_over: bool; (*whether the game ended*)
@@ -40,7 +41,7 @@ type state = logic_state * (ball list)
 
 (*[event] is the game logic actions that can occur in a game*)
 type event =
-  | None (* Done *)
+  | Collide of ball(* A ball collides with pool table wall *)
   | Hit of ball (* Cue ball contacts another ball*)
   | Sink of ball (* A ball sinks, the cue ball does not have to have contacted it*)
 
