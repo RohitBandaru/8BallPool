@@ -3,20 +3,16 @@ open Ball
 
 (*get the next player to take a turn given the state and current player*)
 let next_turn (s:logic_state) : logic_state =
-  if (s.scratch || not s.continue)
+  if (s.game_over) then s
+  else if (s.scratch || not s.continue || not s.collide) (*switch players*)
   then {s with player = s.other_player;
                other_player = s.player;
                ob = 0;
+               break = s.break && s.ob = 0;
+               scratch = s.scratch || not s.collide;
                collide = false;
                continue = false;}
-  else if (not s.collide)
-  then {s with player = s.other_player;
-               other_player = s.player;
-               ob = 0;
-               scratch = true;
-               collide = false;
-               continue = false;}
-  else {s with ob = 0; collide = false; continue = false;}
+  else {s with ob = 0; break = s.break && s.ob = 0; collide = false; continue = false;}
 
   (*resolve the cue ball hitting another ball
     Only called for first ball hit each turn*)
@@ -24,7 +20,7 @@ let next_turn (s:logic_state) : logic_state =
     if (*if ball hit is in legal balls to hit*)
       (List.exists (fun x -> fst x = get_id b) s.player.balls_left)
     then {s with ob = get_id b;}
-    else {s with scratch = true;}
+    else {s with scratch = true; ob = get_id b;}
 
 (*remove a ball from the list of balls*)
 let remove_ball (b : ball) (l: (int * b_type) list) : (int * b_type) list =
@@ -60,8 +56,7 @@ let resolve_sink (s:logic_state) (b:ball) : logic_state =
     s with
     player = {s.player with balls_left = remove_ball b s.player.balls_left;};
     other_player = {s.other_player with balls_left = remove_ball b s.other_player.balls_left;}; (*Both have 1 less ball to sink*)
-    break = false;
-    continue = true;}
+    continue = true; collide = true;}
   else if (s.player.group = Cue) (*if player did not yet decide ball type*)
   then
     {s with
@@ -80,15 +75,14 @@ let resolve_sink (s:logic_state) (b:ball) : logic_state =
           remove_ball b
             (List.filter (fun x -> snd x <> get_type b) s.other_player.balls_left); (*remove all balls of type not matching*)
       }; (*Opponent takes other side*)
-    break = false; (*player just sunk valid ball*)
-    continue = true; (*player just sunk valid ball*)
+    continue = true; collide = true; (*player just sunk valid ball*)
   }
   else if (get_type b = s.player.group)  (*sink own ball*)
   then {
     s with
       player =
           {s.player with balls_left = remove_ball b s.player.balls_left;}; (*1 less ball to sink*)
-      continue = true;}(*sunk a good ball!*)
+      continue = true; collide = true;}(*sunk a good ball!*)
   else (*must have sunk ball of other person*)
     {s with other_player =
         {s.other_player with balls_left = remove_ball b s.other_player.balls_left;};}
@@ -96,7 +90,7 @@ let resolve_sink (s:logic_state) (b:ball) : logic_state =
 let collider s b : logic_state =
   if (s.collide) (*if cue or target ball already hit a rail*)
   then s
-  else if (get_type b = Cue || (*if cue ball or object ball*)
+  else if (get_id b = 0 || (*if cue ball or object ball*)
            get_id b = s.ob)
   then {s with collide = true;}
   else s
@@ -107,7 +101,7 @@ let collider s b : logic_state =
  *)
  let rec step_state (s:logic_state) (el:event list) : logic_state =
   match el with
-  | [] -> {(next_turn s) with continue = false;}
+  | [] -> next_turn s
   | h :: t -> match h with
               | Collide b -> step_state (collider s b) t
               | Hit _ -> (*hitting other colored balls no longer matters*)
@@ -118,7 +112,8 @@ let collider s b : logic_state =
  *inputs: initial state and list of events this turn
  *returns: final state
  *)
- let rec next_state (is:logic_state) (el:event list) : logic_state =
+let rec next_state (is:logic_state) (el:event list) : logic_state =
+  let is = {is with scratch = false;} in (*assume scratch has been resolved by physics and game input*)
   match el with
   | [] -> (*scratch if no balls hit*)
       next_turn {is with scratch = true; continue = false;}
