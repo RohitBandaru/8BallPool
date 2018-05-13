@@ -50,6 +50,9 @@ type event =
 	such as number of balls, game rules, cue type etc. *)
 val init_state : game_type -> state
 
+(* [get_logic] returns the logic state of a game state type*)
+val get_logic : state -> logic_state
+
 (* [ball_locations s] is a list of pool balls and their corresponding locations
  at a given game state. *)
 val ball_locations : state -> ball list

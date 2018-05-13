@@ -105,6 +105,10 @@ let init_state (g:game_type) : state =
       game_over = false;
     }, eight_ball_init_ball_pos)
 
+let get_logic (s:state) : logic_state =
+  match s with
+  | (logic, _) -> logic
+
 let ball_locations (s:state) : ball list = snd s
 
 let next (s:state) : move =
