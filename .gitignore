@@ -7,6 +7,7 @@
 *.cmx
 *.cmxs
 *.cmxa
+utop.ml
 
 # ocamlbuild working directory
 _build/
@@ -23,3 +24,7 @@ setup.log
 \#*#
 .\#*
 *.*~
+*~
+
+*.zip
+

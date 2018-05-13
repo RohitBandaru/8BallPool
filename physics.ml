@@ -1,5 +1,6 @@
 open Ball
 open Printf
+open Data
     
 type ball = Ball.t
 
@@ -15,7 +16,15 @@ let dot v1 v2 =
   match v1, v2 with
   | ((v1x, v1y), (v2x, v2y)) -> v1x *. v2x +. v1y *. v2y
 
+(* diff (a1, a2), (b1, b2) is (a1-b1, a2-b2) *)
+let diff (a1,a2) (b1,b2) = (a1-.b1, a2-.b2)
+
 let norm v1 = (dot v1 v1) ** 0.5
+
+let apply_friction ts b=
+  let (old_vx, old_vy) = Ball.get_velocity b in
+  let (new_v) = (old_vx -. old_vx *. ts *. 0.1, old_vy -. old_vy *. ts *. 0.1) in 
+  Ball.change_velocity b new_v
 
 let collide t1 t2 =
   (* Algorithm comes fom http://www.petercollingridge.co.uk/pygame-physics-simulation/collisions *)
@@ -57,19 +66,54 @@ let collide t1 t2 =
               v2t *. sin tangent_angle +. v2na *. sin norm_angle)
   in
   
-  (*print_float dy;
-    print_float dx;*)
-  (*
-  printf "Normal vector: %f %f\n" dx dy;
-
-  printf "Tangent vector: %f %f\n" (-.dy) dx;
-  printf "Tangent angle: %f\n" tangent_angle;
-  printf "v1t: %f\n" v1t;
-  printf "v1ca (%s): %f %f\n" (Ball.get_name t1) (v1ca |> fst) (v1ca |> snd);
-  printf "v2ca (%s): %f %f\n" (Ball.get_name t2) (v2ca |> fst) (v2ca |> snd);
-*)
-     
-  (Ball.change_velocity t1 v1ca, Ball.change_velocity t2 v2ca)
-
-
   
+  (* (diff (Ball.get_velocity t1) v1ca, diff (Ball.get_velocity t2) v2ca)*)
+   (Ball.change_velocity t1 v1ca, Ball.change_velocity t2 v2ca)
+
+module BallSet = Set.Make(Ball)
+
+let compute_collisions (ball_list: Ball.t list) =
+  let rec collision_h2 ball_list ball (cur_index:int)
+      (max_index:int) (acc) =
+    match ball_list with
+    | [] -> acc
+    | h::t ->
+      if cur_index >= max_index then acc
+      else
+      if is_overlap ball h then
+        begin match collide h ball with
+          | (h', ball') ->
+            (BallSet.remove h acc) |> (BallSet.remove ball)
+            |> (BallSet.add h') |> (BallSet.add ball')
+        end
+      else
+        collision_h2 t ball (cur_index+1) max_index acc
+  in
+  let rec collision_h ball_list cur_index acc=
+    match ball_list with
+    | [] -> acc
+    | h::t -> collision_h t (cur_index+1)
+                (collision_h2 ball_list h 0 cur_index acc)
+      
+  in
+  BallSet.elements (collision_h ball_list 0 (BallSet.of_list ball_list))
+  
+
+
+let simulate_timestep ball_list ts : (Ball.t list * event list)=
+  (* First, we move everything at once. 
+     Then, handle all collisions, adding the new velocities to an accumulator.
+     Then, shift everybody who collided by their velocity * ts...or something.
+     Return (updated list, list of interesting events this timestep)
+  *)
+  
+  let moved_ball_list =
+    List.fold_left (fun acc x ->
+      (Ball.update_position x ts |> (apply_friction ts))::acc
+    ) [] ball_list
+  in
+  let collision_ball_list =
+    compute_collisions moved_ball_list
+  in
+  
+  (collision_ball_list, [])
