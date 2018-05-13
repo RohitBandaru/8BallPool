@@ -160,7 +160,7 @@ let rec loop canvas =
   draw canvas;
   let logic = get_logic !cur_state in
   let balls = get_balls !cur_state in
-  let tdelta = 0.001 in
+  let tdelta = 0.01 in
   cur_state := (logic, fst (simulate_timestep balls tdelta) );
   Html.window##requestAnimationFrame(
     Js.wrap_callback (fun (t:float) -> loop canvas)) |> ignore
