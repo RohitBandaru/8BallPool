@@ -47,3 +47,6 @@ val create_ball: string -> int -> b_type -> string -> float * float -> float * f
 
 (* [compare t1 t2] is a total ordering on balls using their unique ids *)
 val compare: t -> t -> int
+
+(* [print_ball b] prints out information about the ball *)
+val print_ball: t -> unit

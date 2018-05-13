@@ -15,3 +15,5 @@ after they elastically collide
 val collide: Ball.t -> Ball.t -> Ball.t * Ball.t
 
 val simulate_timestep: Ball.t list -> float ->  (Ball.t list * event list)
+
+val compute_collisions: Ball.t list -> Ball.t list

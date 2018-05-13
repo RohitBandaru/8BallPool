@@ -25,7 +25,7 @@ let _ =  print_float (Physics.collide ne nw |> snd |> Ball.get_velocity |> fst);
 let cmp_float_tuple (a1, a2) (b1, b2)=
   cmp_float ~epsilon:1e-5 a1 b1 && cmp_float ~epsilon:1e-5 a2 b2
 
-let _ = printf "%b" (cmp_float_tuple ((Physics.collide nw ne) |> snd |> Ball.get_velocity) (-1.0,1.0))
+(*let _ = printf "%b" (cmp_float_tuple ((Physics.collide nw ne) |> snd |> Ball.get_velocity) (-1.0,1.0))*)
 
 let collision_tests = [
   "orth1" >:: (fun _ ->
@@ -52,12 +52,65 @@ let collision_tests = [
   "collide2" >:: (fun _ ->
       assert_equal (Physics.is_overlap c w) true
     );
+  "what" >:: (fun _ ->
+      assert_equal (
+        let new_ball = 
+          Ball.update_position nw 0.001
+        in
+        let (newx, newy) = Ball.get_position new_ball in
+        printf "\n%f %f\n" newx newy;
+        let new_ball = 
+          Ball.update_position new_ball 0.001
+        in
+        let (newx, newy) = Ball.get_position new_ball in
+        printf "\n%f %f\n" newx newy;
+        let new_ball = 
+          Ball.update_position new_ball 0.001
+        in
+        let (newx, newy) = Ball.get_position new_ball in
+        printf "\n%f %f\n" newx newy;
+        let new_ball = 
+          Ball.update_position new_ball 0.001
+        in
+        let (newx, newy) = Ball.get_position new_ball in
+        printf "\n%f %f\n" newx newy;
+        let new_ball = 
+          Ball.update_position new_ball 0.001
+        in
+        let (newx, newy) = Ball.get_position new_ball in
+        printf "\n%f %f\n" newx newy;
+        let new_ball = 
+          Ball.update_position new_ball 0.001
+        in
+        let (newx, newy) = Ball.get_position new_ball in
+        printf "\n%f %f\n" newx newy;
+        let new_ball = 
+          Ball.update_position new_ball 0.001
+        in
+        let (newx, newy) = Ball.get_position new_ball in
+        printf "\n%f %f\n" newx newy;
+        new_ball
+      ) nw
+    );
     
 ]
 
 let tests = List.flatten [collision_tests]
 
+let ball_list = [nw; ne]
+
+let ball_list_2 = compute_collisions ball_list
+
+let _ = List.fold_left (fun acc x ->
+    let (a,b) = Ball.get_velocity x in
+    printf "Velocity: %f, %f\n" a b;
+    acc
+  ) [] ball_list
+
+
+let _ = printf "%f" ((collide nw ne) |> fst |> Ball.get_velocity |> fst)
+
 let suite = "Physics test suite" >::: tests
 
-let _ = run_test_tt_main suite
+(*let _ = run_test_tt_main suite*)
 
