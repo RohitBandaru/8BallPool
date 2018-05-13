@@ -80,13 +80,16 @@ let draw_state canvas =
   List.iter (fun b -> draw_ball canvas b 0. ) init_pos
 
 let draw_stick canvas =
+  let cue_pos = get_position (List.find (fun b -> get_id b = 0 ) init_pos) in
+  let stick_length = 300. in
+  let brad = 11.4 in
   let ctx = canvas##getContext (Html._2d_) in
-  let bx = (128.) in
-  let by = 128. in
     ctx##beginPath;
-    ctx##moveTo 0.0 0.0;
-    ctx##lineTo (bx+.300.+.(!stick_angle)) (by+.150.);
-    ctx##.lineWidth := 10.;
+    ctx##moveTo (fst cue_pos +. table_off +.  (brad+. !power)*.(cos !stick_angle))
+      (snd cue_pos +. table_off +.  (brad +. !power)*.(sin !stick_angle));
+    ctx##lineTo (fst cue_pos +. table_off +. (brad +. stick_length +. !power)*.(cos !stick_angle))
+      (snd cue_pos +. table_off +. (brad +. stick_length +. !power)*.(sin !stick_angle));
+    ctx##.lineWidth := 7.;
     ctx##.fillStyle := stick_color;
     ctx##stroke
 
@@ -103,11 +106,11 @@ let keydown canvas event =
   let () = match event##.keyCode with
     | 13 -> (* enter *)if (!power > 10.) then
       move canvas;
-    | 37 -> stick_angle := !stick_angle -. 1.0;
+    | 37 -> stick_angle := !stick_angle -. 0.1;
       draw_stick canvas(* left *)
     | 38 -> (* up *) if (!power < 100.) then power := !power +. 1.0;
       draw_stick canvas
-    | 39 -> stick_angle := !stick_angle +. 1.0;
+    | 39 -> stick_angle := !stick_angle +. 0.1;
       draw_stick canvas(* left *)
     | 40 -> (* down *)if (!power > 0.) then power := !power -. 1.0;
       draw_stick canvas
@@ -175,53 +178,3 @@ let rec init _ =
 
 let _ =
   Html.window##.onload := Html.handler (fun _ -> init (); Js._true);
-
-
-  (*
-
-  let _ = Html.addEventListener
-      document Html.Event.keydown (Html.handler keydown)
-      Js._true in
-let rec start2 _ =
-  ()
-
-
-
-  let _ = Html.addEventListener
-      document Html.Event.keydown (Html.handler keyup)
-      Js._true in
-
-  let main =
-    Js.Opt.get (document##getElementById (jstr "main"))
-      (fun () -> assert false)
-  in
-
-  Dom.appendChild main
-    (button "reset" main);
-
-
-  let _ = Html.addEventListener
-      document Html.Event.keydown (Html.handler keyup)
-  in
-
-let button name main =
-  let res = document##createDocumentFragment in
-  let input = Html.createInput ~_type:(jstr "submit") document in
-  input##.value := jstr name;
-  input##.onclick := Html.handler (fun _ ->
-          let div = Html.createDiv document in
-          Dom.appendChild main div;
-          Js._false);
-  Dom.appendChild res input;
-  res
-
-
-let keyup event =
-  let () = match event##keyCode with
-    | 83 -> ()
-    | _ -> ()
-  in Js._true
-
-
-
-  *)
