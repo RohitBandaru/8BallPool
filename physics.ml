@@ -100,7 +100,7 @@ let compute_collisions (ball_list: Ball.t list) =
   
 
 
-let simulate_timestep ball_list ts =
+let simulate_timestep ball_list ts : (Ball.t list * event list)=
   (* First, we move everything at once. 
      Then, handle all collisions, adding the new velocities to an accumulator.
      Then, shift everybody who collided by their velocity * ts...or something.
