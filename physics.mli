@@ -1,4 +1,5 @@
 open Ball
+open Data
 
 (* [is_overlap t1 t2] returns True iff t1 and t2 are overlapping each other
    ie. there is a point x s.t. the distance from x to t1's center <= t1's radius
@@ -12,3 +13,5 @@ after they elastically collide
  * requires: is_overlap t1 t2 returns True
 *)
 val collide: Ball.t -> Ball.t -> Ball.t * Ball.t
+
+val simulate_timestep: Ball.t list -> (Ball.t list * event list)

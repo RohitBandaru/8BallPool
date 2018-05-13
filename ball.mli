@@ -45,3 +45,5 @@ val update_position: t -> float -> t
 (* [create_ball name id group color velocity position mass radius] creates a new ball*)
 val create_ball: string -> int -> b_type -> string -> float * float -> float * float -> float -> float -> t
 
+(* [compare t1 t2] is a total ordering on balls using their unique ids *)
+val compare: t -> t -> int

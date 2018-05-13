@@ -12,6 +12,8 @@ type t = {name: string;
           position: float * float;
           mass: float;
           radius: float;}
+let compare t1 t2 =
+  Pervasives.compare t1.id t2.id
 
 let get_mass t = t.mass
 
