@@ -1,5 +1,6 @@
 open Data
 open Ball
+open Physics
 
 module Html = Dom_html
 
@@ -19,9 +20,9 @@ let solid_color = jstr "#C3272B"
 
 let init_pos = eight_ball_init_ball_pos
 
-let cur_state = init_state EightBallSolo
+let cur_state = ref (init_state EightBall)
 
-let scratch = ref (get_logic cur_state).scratch
+let scratch = ref (get_logic !cur_state).scratch
 
 let mouseX = ref 0.
 
@@ -77,7 +78,8 @@ let draw_ball canvas ball off =
     ctx##fill *)
 
 let draw_state canvas =
-  List.iter (fun b -> draw_ball canvas b 0. ) init_pos
+  let ball_lst = ball_locations !cur_state in
+  List.iter (fun b -> draw_ball canvas b 0. ) ball_lst
 
 let draw_stick canvas =
   let cue_pos = get_position (List.find (fun b -> get_id b = 0 ) init_pos) in
@@ -156,6 +158,10 @@ let mouseup canvas event =
 
 let rec loop canvas =
   draw canvas;
+  let logic = get_logic !cur_state in
+  let balls = get_balls !cur_state in
+  let tdelta = 0.001 in
+  cur_state := (logic, fst (simulate_timestep balls tdelta) );
   Html.window##requestAnimationFrame(
     Js.wrap_callback (fun (t:float) -> loop canvas)) |> ignore
 

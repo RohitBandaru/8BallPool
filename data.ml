@@ -109,6 +109,8 @@ let get_logic (s:state) : logic_state =
   match s with
   | (logic, _) -> logic
 
+let get_balls (s:state) : ball list = snd s
+
 let ball_locations (s:state) : ball list = snd s
 
 let next (s:state) : move =
