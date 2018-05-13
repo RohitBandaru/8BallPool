@@ -1,21 +1,45 @@
+open Data
+open Ball
+
 module Html = Dom_html
+
 let jstr = Js.string
 let document = Html.window##.document
 
 let pi = acos (-1.)
 
 let bg_color = jstr "#BDC3C7"
+
 let brdr_color = jstr "#af7418"
 let pool_color = jstr "#0a6c03"
 let ball_color = jstr "white"
 
+let stripe_color = jstr "#22A7F0"
+let solid_color = jstr "#C3272B"
+
+let init_pos = eight_ball_init_ball_pos
+
+let table_off = 76.
+
+let test_ball =
+  match init_pos with
+  | [] -> failwith "Empty"
+  | h::t -> h
+
+let (tbx, tby) = get_position test_ball
+
+let ball_color = jstr "red"
+let stick_color = jstr "blue"
+
+let stick_angle = ref 0.0
+let power = ref 0.0
+
 let draw_background canvas =
   let ctx = canvas##getContext (Html._2d_) in
-  let cw = float canvas##.width in
-  let ch = float canvas##.height in
-    ctx##rect 0. 0. cw ch;
-    ctx##.fillStyle := pool_color;
-    ctx##fill
+  let tablesrc = jstr "img/table-scaled.png" in
+  let tableimg = Html.createImg document in
+  tableimg##.src := tablesrc;
+  ctx##drawImage tableimg 0. 0.
 
 let draw_board canvas =
   let ctx = canvas##getContext (Html._2d_) in
@@ -28,27 +52,61 @@ let draw_board canvas =
     ctx##fillRect 0. (ch-.border_rad) cw border_rad;
     ctx##fillRect (cw-.border_rad) 0. border_rad ch
 
-let draw_ball canvas off =
+let draw_ball canvas ball off =
   let ctx = canvas##getContext (Html._2d_) in
-    let bx = 128. +. off in
-    let by = 128. in
+  let t_o = table_off in
+    let (bx, by) = get_position ball in
+    let (bx, by) = (bx+.t_o, by+.t_o) in
     let brad = 11.4 in
-    ctx##beginPath;
+    let ballsrc = jstr (get_color ball) in
+    let ballimg = Html.createImg document in
+    ballimg##.src := ballsrc;
+    ctx##drawImage_withSize ballimg (bx-.brad) (by-.brad) (2.*.brad) (2.*.brad)
+    (* ctx##beginPath;
     ctx##arc bx by brad 0. (2.0*.pi) Js._true;
     ctx##.fillStyle := ball_color;
-    ctx##fill
+    ctx##fill *)
+
+let draw_state canvas =
+  List.iter (fun b -> draw_ball canvas b 0. ) init_pos
+
+let draw_stick canvas =
+  let ctx = canvas##getContext (Html._2d_) in
+  let bx = (128.) in
+  let by = 128. in
+    ctx##beginPath;
+    ctx##moveTo 0.0 0.0;
+    ctx##lineTo (bx+.300.+.(!stick_angle)) (by+.150.);
+    ctx##.lineWidth := 10.;
+    ctx##.fillStyle := stick_color;
+    ctx##stroke
 
 let draw canvas off =
   draw_background canvas;
-  draw_board canvas;
-  draw_ball canvas off;
+  draw_state canvas;
+  draw_stick canvas;
   ()
 
+let move canvas =
+  ()
+
+let keydown canvas event =
+  let () = match event##.keyCode with
+    |13 -> (* enter *)if (!power > 10.) then
+      move canvas;
+    |37 -> stick_angle := !stick_angle -. 1.0;
+      draw_stick canvas(* left *)
+    |38 -> (* up *) if (!power < 100.) then power := !power +. 1.0;
+      draw_stick canvas
+    |39 -> stick_angle := !stick_angle +. 1.0;
+      draw_stick canvas(* left *)
+    |40 -> (* down *)if (!power > 0.) then power := !power -. 1.0;
+      draw_stick canvas
+    | _ -> () (* other *)
+  in Js._true
+
+
 let rec start _ =
-  let main =
-    Js.Opt.get (document##getElementById (jstr "main"))
-      (fun () -> assert false)
-  in
   let canvas =
     Js.Opt.get
       (Js.Opt.bind ( Html.document##getElementById (jstr "canvas"))
@@ -56,11 +114,13 @@ let rec start _ =
       (fun () ->
         Printf.printf "Cant find canvas \n";
         assert false ) in
-
+  Html.document##.onkeydown :=
+      (Html.handler
+         (fun e -> keydown canvas e));
   let rec looper off =
     draw canvas off;
     Html.window##requestAnimationFrame(
-      Js.wrap_callback (fun (t:float) -> looper (off+.1.0))
+      Js.wrap_callback (fun (t:float) -> looper (off+.(t/.100.0)))
     ) |> ignore
   in looper 0.0
 
@@ -69,6 +129,23 @@ let _ =
 
 
   (*
+
+  let _ = Html.addEventListener
+      document Html.Event.keydown (Html.handler keydown)
+      Js._true in
+let rec start2 _ =
+  ()
+
+
+
+  let _ = Html.addEventListener
+      document Html.Event.keydown (Html.handler keyup)
+      Js._true in
+
+  let main =
+    Js.Opt.get (document##getElementById (jstr "main"))
+      (fun () -> assert false)
+  in
 
   Dom.appendChild main
     (button "reset" main);
@@ -96,7 +173,6 @@ let keyup event =
     | _ -> ()
   in Js._true
 
->>>>>>> f4e137e7a90b7098a8d51ca8c0936c36431c7bc6
 
 
   *)

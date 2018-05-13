@@ -1,5 +1,7 @@
 open Ball
 
+type ball = t
+
 (* [game_type] is the game mode default Eight-ball *)
 type game_type =
   |EightBallSolo
@@ -36,36 +38,11 @@ type logic_state = {
 (* [state] is a type representing the game state. *)
 type state = logic_state * (ball list)
 
-(*[event] is the type*)
+(*[event] is the game logic actions that can occur in a game*)
 type event =
   | None (* Done *)
   | Hit of ball (* Cue ball contacts another ball*)
   | Sink of ball (* A ball sinks, the cue ball does not have to have contacted it*)
-
-
-(* [player] is an abstract type representing a player in the game *)
-type player = {
-	name			: string;
-	points		: int;
-	group			: b_group;
-}
-
-(* [state] is an abstract type representing the game state. *)
-type state = {
-
-	(* [mode] is the game type in play *)
-	mode 		: game_type;
-
-	(* [balls] is an assoc list of all active balls in play in the format (id, ball) *)
-	balls 	: (int * ball) list;
-
-	(* [players] is a list of all the players (either 1 or 2 players) *)
-	players : player list;
-}
-
-
-(* [move] representing *)
-type move = { player:player; velocity:(float*float) }
 
 (* [init_state s] is the initial state of the pool game given a game_type
 	It will initialize a game state taking into account different variables
@@ -76,5 +53,4 @@ val init_state : game_type -> state
  at a given game state. *)
 val ball_locations : state -> ball list
 
-(* [next s] is the next move that will take place *)
-val move : state -> move
+val eight_ball_init_ball_pos : ball list

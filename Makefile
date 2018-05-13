@@ -3,6 +3,12 @@ find:
 	js_of_ocaml draw.byte
 
 build:
+	ocamlbuild -use-ocamlfind -package js_of_ocaml -package js_of_ocaml-ppx draw.byte
+
+compile:
+	js_of_ocaml draw.byte
+
+build-old:
 	ocamlbuild -use-ocamlfind \
 		-plugin-tag "package(js_of_ocaml.ocamlbuild)" \
 		-no-links \
@@ -17,6 +23,10 @@ test:
 physics:
 	ocamlbuild -use-ocamlfind test_physics.byte && ./test_physics.byte
 
+8b:
+	ocamlbuild -use-ocamlfind test_eightball.byte && ./test_eightball.byte
+
 # # clean:
 # # 	ocamlbuild -clean
 # # 	rm -f a4src.zip
+# # ocamlbuild -use-ocamlfind -plugin-tag "package(js_of_ocaml.ocamlbuild)" -no-links draw.byte
