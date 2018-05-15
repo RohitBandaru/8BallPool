@@ -23,6 +23,7 @@ val pocket_sw:  float*float
 val pocket_s:   float*float
 val pocket_se:  float*float
 
+val pockets: (float*float) list
 
 val simulate_timestep: Ball.t list -> float ->  (Ball.t list * event list)
 

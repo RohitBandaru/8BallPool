@@ -3,10 +3,10 @@ find:
 	js_of_ocaml draw.byte
 
 build:
-	ocamlbuild -use-ocamlfind -package js_of_ocaml -package js_of_ocaml-ppx draw.byte
+	ocamlbuild -tag debug -use-ocamlfind -package js_of_ocaml -package js_of_ocaml-ppx draw.byte
 
 compile:
-	js_of_ocaml draw.byte
+	js_of_ocaml --pretty --debug-info --source-map draw.byte
 
 build-old:
 	ocamlbuild -use-ocamlfind \
