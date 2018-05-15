@@ -25,6 +25,7 @@ physics:
 
 8b:
 	ocamlbuild -use-ocamlfind test_eightball.byte && ./test_eightball.byte
+demo: build compile
 
 # # clean:
 # # 	ocamlbuild -clean

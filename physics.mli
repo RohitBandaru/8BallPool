@@ -16,12 +16,12 @@ after they elastically collide
 val collide: Ball.t -> Ball.t -> ((int * (float * float)) * (int * (float * float)))
 
 
-val pocket_nw: float*float
-val pocket_n: float*float
-val pocket_ne: float*float
-val pocket_sw: float*float
-val pocket_s: float*float
-val pocket_se: float*float
+val pocket_nw:  float*float
+val pocket_n:   float*float
+val pocket_ne:  float*float
+val pocket_sw:  float*float
+val pocket_s:   float*float
+val pocket_se:  float*float
 
 
 val simulate_timestep: Ball.t list -> float ->  (Ball.t list * event list)
