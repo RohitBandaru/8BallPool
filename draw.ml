@@ -112,6 +112,39 @@ let draw_stick canvas =
     ctx##.fillStyle := stick_color;
     ctx##stroke
 
+let draw_b2sink canvas =
+  let ctx = canvas##getContext (Html._2d_) in
+  let t_o = table_off +. rail_off in
+  let logic = get_logic !cur_state in
+  let (p1, p2) =
+    (if logic.player.id = 0 then
+      (logic.player, logic.other_player)
+    else
+      (logic.other_player, logic.player)) in
+  let (p1b2s, p2b2s) =  ((fst (List.split p1.balls_left)), (fst (List.split p2.balls_left))) in
+  let brad = 11.4 in
+  let offset = brad *. 2.5 in
+  let (bx, by) = (table_off +. brad, 845.) in
+  List.iteri
+    (fun i b_id -> begin
+      let ball = search_ball !cur_state b_id in
+      let (bx', by') = (bx +. (offset *. (float_of_int i)), by) in
+      let ballsrc = jstr (get_color ball) in
+      let ballimg = Html.createImg document in
+      ballimg##.src := ballsrc;
+      ctx##drawImage_withSize ballimg (bx'-.brad) (by'-.brad) (2.*.brad) (2.*.brad)
+    end ) p1b2s;
+  let (bx, by) = (table_off +. 1175. +. brad, 845.) in
+  List.iteri
+    (fun i b_id -> begin
+      let ball = search_ball !cur_state b_id in
+      let (bx', by') = (bx -. (offset *. (float_of_int i)), by) in
+      let ballsrc = jstr (get_color ball) in
+      let ballimg = Html.createImg document in
+      ballimg##.src := ballsrc;
+      ctx##drawImage_withSize ballimg (bx'-.brad) (by'-.brad) (2.*.brad) (2.*.brad)
+    end ) p2b2s
+
 let draw_hud canvas =
   let ctx = canvas##getContext (Html._2d_) in
   let txt8ballsrc   = jstr "img/txt-8ball.png" in
@@ -131,10 +164,12 @@ let draw_hud canvas =
   txtb2sinkimg##.src  := txtb2sinksrc;
   ctx##drawImage_withSize txt8ballimg 0. 0. 250. 75.;
   ctx##drawImage_withSize txtp1turnimg table_off 740. 210. 60.;
-  ctx##drawImage_withSize txtp2turnimg (table_off+.1000.) 740. 210. 60.;
-  ctx##drawImage_withSize txtscratchimg (table_off +.500.) 740. 180. 60.;
+  ctx##drawImage_withSize txtp2turnimg (table_off+.960.) 740. 210. 60.;
   ctx##drawImage_withSize txtb2sinkimg table_off 780. 240. 60.;
-  ctx##drawImage_withSize txtb2sinkimg (table_off+.1000.) 780. 240. 60.
+  ctx##drawImage_withSize txtb2sinkimg (table_off+.960.) 780. 240. 60.;
+  if !cur_mode = SCRATCH then
+    ctx##drawImage_withSize txtscratchimg (table_off +.500.) 740. 180. 60.;
+  draw_b2sink canvas
 
 
 let draw canvas =
@@ -201,20 +236,24 @@ let handle_invalid_scratch _ =
   debug "ope that was an invalid scratch"
 
 let mouseup canvas event =
-  let rect = canvas##getBoundingClientRect in
-  let canvasX = (float_of_int event##.clientX) -. rect##.left in
-  let canvasY = (float_of_int event##.clientY) -. rect##.top in
-  let updateX = canvasX -. (table_off+.rail_off) in
-  let updateY = canvasY -. (table_off+.rail_off) in
-  let _ =
-    if valid_pos (updateX, updateY) then
-      begin
-        cur_state := update_cue_ball_position !cur_state (updateX, updateY);
-        cur_mode  := PTURN
-      end
-    else
-      handle_invalid_scratch ()
-  in Js._true
+  match !cur_mode with
+  | SCRATCH -> begin
+    let rect = canvas##getBoundingClientRect in
+    let canvasX = (float_of_int event##.clientX) -. rect##.left in
+    let canvasY = (float_of_int event##.clientY) -. rect##.top in
+    let updateX = canvasX -. (table_off+.rail_off) in
+    let updateY = canvasY -. (table_off+.rail_off) in
+    let _ =
+      if valid_pos (updateX, updateY) then
+        begin
+          cur_state := update_cue_ball_position !cur_state (updateX, updateY);
+          cur_mode  := PTURN
+        end
+      else
+        handle_invalid_scratch ()
+    in Js._true
+  end
+  | _ -> Js._false
 
 let rec loop canvas =
   draw canvas;

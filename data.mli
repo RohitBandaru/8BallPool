@@ -55,6 +55,8 @@ val get_logic : state -> logic_state
 
 val get_balls : state -> ball list
 
+val search_ball : state -> int -> ball
+
 val update_cue_ball_position : state ->  float*float -> state
 (* [ball_locations s] is a list of pool balls and their corresponding locations
  at a given game state. *)
