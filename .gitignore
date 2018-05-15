@@ -8,6 +8,7 @@
 *.cmxs
 *.cmxa
 utop.ml
+draw.js
 
 # ocamlbuild working directory
 _build/
@@ -27,4 +28,3 @@ setup.log
 *~
 
 *.zip
-
