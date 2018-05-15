@@ -1,0 +1,36 @@
+### Starting build.
+# Target: draw.mli.depends, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), debug, extension:mli, file:draw.mli, ocaml, ocamldep, quiet, traverse, use_menhir }
+ocamlfind ocamldep -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -modules draw.mli > draw.mli.depends
+# Target: ball.mli.depends, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), debug, extension:mli, file:ball.mli, ocaml, ocamldep, quiet, traverse, use_menhir }
+ocamlfind ocamldep -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -modules ball.mli > ball.mli.depends
+# Target: data.mli.depends, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), debug, extension:mli, file:data.mli, ocaml, ocamldep, quiet, traverse, use_menhir }
+ocamlfind ocamldep -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -modules data.mli > data.mli.depends
+# Target: ball.cmi, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), byte, compile, debug, extension:mli, file:ball.mli, interf, ocaml, quiet, traverse, use_menhir }
+ocamlfind ocamlc -c -g -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -o ball.cmi ball.mli
+# Target: data.cmi, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), byte, compile, debug, extension:mli, file:data.mli, interf, ocaml, quiet, traverse, use_menhir }
+ocamlfind ocamlc -c -g -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -o data.cmi data.mli
+# Target: draw.cmi, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), byte, compile, debug, extension:mli, file:draw.mli, interf, ocaml, quiet, traverse, use_menhir }
+ocamlfind ocamlc -c -g -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -o draw.cmi draw.mli
+# Target: draw.ml.depends, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), debug, extension:ml, file:draw.ml, ocaml, ocamldep, quiet, traverse, use_menhir }
+ocamlfind ocamldep -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -modules draw.ml > draw.ml.depends
+# Target: physics.mli.depends, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), debug, extension:mli, file:physics.mli, ocaml, ocamldep, quiet, traverse, use_menhir }
+ocamlfind ocamldep -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -modules physics.mli > physics.mli.depends
+# Target: physics.cmi, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), byte, compile, debug, extension:mli, file:physics.mli, interf, ocaml, quiet, traverse, use_menhir }
+ocamlfind ocamlc -c -g -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -o physics.cmi physics.mli
+# Target: draw.cmo, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), byte, compile, debug, extension:cmo, extension:ml, file:draw.cmo, file:draw.ml, implem, ocaml, quiet, traverse, use_menhir }
+ocamlfind ocamlc -c -g -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -o draw.cmo draw.ml
+# Target: ball.ml.depends, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), debug, extension:ml, file:ball.ml, ocaml, ocamldep, quiet, traverse, use_menhir }
+ocamlfind ocamldep -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -modules ball.ml > ball.ml.depends
+# Target: data.ml.depends, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), debug, extension:ml, file:data.ml, ocaml, ocamldep, quiet, traverse, use_menhir }
+ocamlfind ocamldep -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -modules data.ml > data.ml.depends
+# Target: physics.ml.depends, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), debug, extension:ml, file:physics.ml, ocaml, ocamldep, quiet, traverse, use_menhir }
+ocamlfind ocamldep -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -modules physics.ml > physics.ml.depends
+# Target: ball.cmo, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), byte, compile, debug, extension:cmo, extension:ml, file:ball.cmo, file:ball.ml, implem, ocaml, quiet, traverse, use_menhir }
+ocamlfind ocamlc -c -g -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -o ball.cmo ball.ml
+# Target: data.cmo, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), byte, compile, debug, extension:cmo, extension:ml, file:data.cmo, file:data.ml, implem, ocaml, quiet, traverse, use_menhir }
+ocamlfind ocamlc -c -g -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -o data.cmo data.ml
+# Target: physics.cmo, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), byte, compile, debug, extension:cmo, extension:ml, file:physics.cmo, file:physics.ml, implem, ocaml, quiet, traverse, use_menhir }
+ocamlfind ocamlc -c -g -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml -o physics.cmo physics.ml
+# Target: draw.byte, tags: { package(js_of_ocaml), package(js_of_ocaml-ppx), package(oUnit), package(str), byte, debug, dont_link_with, extension:byte, file:draw.byte, link, ocaml, program, quiet, traverse, use_menhir }
+ocamlfind ocamlc -linkpkg -g -package oUnit -package str -package js_of_ocaml-ppx -package js_of_ocaml ball.cmo data.cmo physics.cmo draw.cmo -o draw.byte
+# Compilation successful.
