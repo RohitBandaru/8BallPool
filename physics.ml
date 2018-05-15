@@ -145,6 +145,13 @@ let pocket_s = (pocket_middle_x, pocket_mid_bot_y)
 let pocket_ne = (pocket_right_x, pocket_top_y)
 let pocket_se = (pocket_right_x, pocket_bot_y)
 
+let pockets =
+  [ pocket_nw;
+    pocket_sw;
+    pocket_n;
+    pocket_s;
+    pocket_ne;
+    pocket_se ]
 
 let collide_pocket ball pocket_pos =
   let (x1, y1) = Ball.get_position ball in
@@ -253,7 +260,7 @@ let is_bounce ball =
 
 ||
       (* S pocket, right wall, down -> left *)
-      
+
       (by >= table_bot -. r) &&
       (
         (bx <= pocket_middle_x +.center_pocket_radius +. rim_width
@@ -263,8 +270,8 @@ let is_bounce ball =
         )
       )
 
-      
-      
+
+
     ) ||
     (* regular wall bouncing, not near pockets *)
     (
@@ -286,9 +293,9 @@ let is_bounce ball =
 
   then true
   else
-    
+
     false
-    
+
 let bounce ball =
 (* Algorithm comes fom http://www.petercollingridge.co.uk/pygame-physics-simulation/collisions *)
   let (x1, y1) = Ball.get_position ball in
@@ -296,7 +303,7 @@ let bounce ball =
   let norm_r = r /. 0.8 in
   (*if x1 <= 76. then*)
 
-  
+
   if
     (* NE pocket, top wall, right -> up *)
     (x1 >= table_right -. Ball.get_radius ball
@@ -339,9 +346,9 @@ let bounce ball =
         x1 -. (pocket_middle_x +. center_pocket_radius ) +. (y1 -. table_bot+. rim_width) >= norm_r
       )
       )
-    
-     
-  then 
+
+
+  then
 
     (*let norm_angle = atan2 0. 1. in
     let norm_vector = (1.,0.) in
@@ -402,7 +409,7 @@ let bounce ball =
         x1 -. (pocket_middle_x -. center_pocket_radius) -. (y1 -. table_bot) <= norm_r
       )
     )
-    
+
   then
 
     let norm_angle = atan2 nw_dy nw_dx in
@@ -418,13 +425,13 @@ let bounce ball =
                 v1t *. sin tangent_angle +. v1na *. sin norm_angle
                ) in
     (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
-  else 
-    
+  else
+
   if x1 <= table_left +. Ball.get_radius ball
 
   && y1 <= (bottom_rim_offset -. rim_width)
   && y1 >= top_rim_offset +. rim_width
-  then 
+  then
     (*let norm_angle = atan2 0. 1. in
     let norm_vector = (1.,0.) in
     let tangent_angle = atan2 (-1.) 0. in
@@ -478,7 +485,7 @@ let bounce ball =
        && x1 >= rim_width
        && x1 <= pocket_right_x -. pocket_radius -. rim_width
        && not (x1 <= pocket_middle_x +. center_pocket_radius +. rim_width
-               && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width) 
+               && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width)
 
   then
     let norm_angle = atan2 bot_dy bot_dx in
@@ -497,7 +504,7 @@ let bounce ball =
        && x1 >= rim_width
        && x1 <= pocket_right_x -. pocket_radius -. rim_width
        && not (x1 <= pocket_middle_x +. center_pocket_radius +. rim_width
-               && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width) 
+               && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width)
 
   then
 

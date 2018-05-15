@@ -206,17 +206,21 @@ let draw_hud canvas =
 
 let draw_pocket canvas =
   let ctx = canvas##getContext (Html._2d_) in
-  let (px, py) = pocket_sw in
-  let pocketsrc = jstr "img/0.png" in
-  let pocketimg = Html.createImg document in
-  pocketimg##.src := pocketsrc;
-  ctx##drawImage_withSize pocketimg (px-.16.) (py-.16.) 32. 32.
+  let t_o = table_off +. rail_off in
+  List.iter (fun pocket -> begin
+    let (px', py') = pocket in
+    let (px, py) = (px' +. t_o, py' +. t_o) in
+    let pocketsrc = jstr "img/0.png" in
+    let pocketimg = Html.createImg document in
+    pocketimg##.src := pocketsrc;
+    ctx##drawImage_withSize pocketimg (px-.32.) (py-.32.) 64. 64.
+    end ) pockets
 
 let draw canvas =
   draw_background canvas;
   draw_hud canvas;
   draw_state canvas;
-  (* draw_pocket canvas; *)
+  draw_pocket canvas;
   ()
 
 let move canvas =
