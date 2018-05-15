@@ -40,6 +40,10 @@ val get_radius: t -> float
    with velocity set to [v] *)
 val change_velocity: t -> float * float -> t
 
+(* [change_position t p] returns a new ball with all aspects the same but
+   with position set to [p] *)
+val change_position: t -> float * float -> t
+
 val update_position: t -> float -> t
 
 (* [create_ball name id group color velocity position mass radius] creates a new ball*)
