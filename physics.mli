@@ -17,4 +17,4 @@ val collide: Ball.t -> Ball.t -> ((int * (float * float)) * (int * (float * floa
 
 val simulate_timestep: Ball.t list -> float ->  (Ball.t list * event list)
 
-val compute_collisions: Ball.t list -> Ball.t list
+val compute_collisions: Ball.t list -> (Ball.t list * event list)

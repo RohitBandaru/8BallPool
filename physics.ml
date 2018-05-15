@@ -26,7 +26,7 @@ let norm v1 = (dot v1 v1) ** 0.5
 let apply_friction ts b=
   let (old_vx, old_vy) = Ball.get_velocity b in
 
-  let (new_v) = (old_vx -. old_vx *. ts *. 0.2, old_vy -. old_vy *. ts *. 0.2) in
+  let (new_v) = (old_vx -. old_vx *. ts *. 0.15, old_vy -. old_vy *. ts *. 0.15) in
 
 
   Ball.change_velocity b new_v
@@ -77,13 +77,6 @@ let collide t1 t2 =
   let v2ca = (v2t *. cos tangent_angle +. v2na *. cos norm_angle,
               v2t *. sin tangent_angle +. v2na *. sin norm_angle)
   in
-  Firebug.console##log (string_of_float v1na);
-  Firebug.console##log (string_of_float v2na);
-  Firebug.console##log (string_of_float v1t);
-  Firebug.console##log (string_of_float v2t);
-  Firebug.console##log (string_of_float (norm_vector |> fst));
-  Firebug.console##log (string_of_float (norm_vector |> snd));
-
 
   ((Ball.get_id t1, (diff v1ca (Ball.get_velocity t1) )),
     (Ball.get_id t2, (diff v2ca (Ball.get_velocity t2) )))
@@ -102,10 +95,178 @@ let update key new_val map=
   then IntMap.add key (sum (IntMap.find key map) new_val) map
   else IntMap.add key new_val map
 
+let table_top = 0.
+let table_bot = 512.
+let table_left = 0.
+let table_right = 1024.
+
+
+(* dx, dy for bouncing off each wall *)
+let left_dx = 1.
+let right_dx = -1.
+let left_dy = 0.
+let right_dy = 0.
+let top_dx = 0.
+let bot_dx = 0.
+let top_dy = -1.
+let bot_dy = 1.
+
+(* dx, dy for boucning off the pool pocket walls *)
+let ne_dx = 0.5**0.5
+let ne_dy = -.(0.5 ** 0.5)
+(*let ne_dx = 1.
+  let ne_dy = 0.*)
+
+
+let rim_width = 22.
+let pocket_radius = 32.
+(* coordinate of the bottom part of the top holes *)
+let top_rim_offset = 19.
+let bottom_rim_offset = 512. -. top_rim_offset
+
+let pocket_top_y = table_bot +. top_rim_offset -. pocket_radius
+let pocket_bot_y = table_top -. top_rim_offset +. pocket_radius
+let pocket_left_x = table_left -. rim_width
+let pocket_right_x = table_right +. rim_width
+let pocket_middle_x = (table_right +. table_left) /. 2.
+
+
+
+let pocket_nw = (pocket_left_x, pocket_top_y)
+let pocket_sw = (pocket_left_x, pocket_bot_y)
+let pocket_n = (pocket_middle_x, pocket_top_y)
+let pocket_s = (pocket_middle_x, pocket_bot_y)
+let pocket_ne = (pocket_right_x, pocket_top_y)
+let pocket_se = (pocket_right_x, pocket_bot_y)
+
+
+let is_bounce ball =
+  let (bx, by) = Ball.get_position ball in
+  if  bx <= table_left +. Ball.get_radius ball &&
+
+      ((by <= bottom_rim_offset && by >= bottom_rim_offset -. rim_width) &&
+       (by-. ( bottom_rim_offset)) +.( bx -. table_left +. rim_width) <= (Ball.get_radius ball) /. (0.5 ** 0.5))
+
+    ||bx >= table_right -. Ball.get_radius ball
+      && (by >= top_rim_offset && by <= top_rim_offset +. rim_width) &&
+      ((by >= top_rim_offset && by <= top_rim_offset +. rim_width) &&
+      (by-. (table_top +. top_rim_offset)) +.( bx -. table_right ) <=0.)
+
+    (*bx >= table_right -. Ball.get_radius ball*)
+   || by >= table_bot -. (Ball.get_radius ball) || by <= table_top +. (Ball.get_radius ball)
+  then true
+  else false
+
+let bounce ball =
+(* Algorithm comes fom http://www.petercollingridge.co.uk/pygame-physics-simulation/collisions *)
+  let (x1, y1) = Ball.get_position ball in
+  (*if x1 <= 76. then*)
+  
+  if (x1 >= table_right -. Ball.get_radius ball
+      && (y1 >= top_rim_offset && y1 <= top_rim_offset +. rim_width) &&
+      (y1-. (table_top +. top_rim_offset)) +.( x1 -. table_right ) <= 0. )
+     ||
+     (x1 <= table_left +. Ball.get_radius ball
+      && (y1 <= bottom_rim_offset && y1 >= bottom_rim_offset -. rim_width) &&
+      (y1-. ( bottom_rim_offset)) +.( x1 -. table_left ) <= Ball.get_radius ball )
+     
+  then 
+    (*let norm_angle = atan2 0. 1. in
+    let norm_vector = (1.,0.) in
+    let tangent_angle = atan2 (-1.) 0. in
+      let tan_vector = (0., -1.) in*)
+    let norm_angle = atan2 ne_dy ne_dx in
+    Firebug.console##log (string_of_float norm_angle);
+    let norm_vector = (ne_dx,ne_dy) in
+    let tangent_angle = atan2 (-.ne_dx) ne_dy in
+    let tan_vector = (ne_dy, -.ne_dx) in
+    
+    let v1nb = -.dot (Ball.get_velocity ball) (norm_vector) in
+    let v1t =  -.dot (Ball.get_velocity ball) tan_vector in
+    let v1na = -. v1nb in
+    let v1ca = (v1t *. cos tangent_angle +. v1na *. cos norm_angle,
+                v1t *. sin tangent_angle +. v1na *. sin norm_angle
+               ) in
+    (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
+  else
+  if x1 <= table_left +. Ball.get_radius ball
+  then 
+    (*let norm_angle = atan2 0. 1. in
+    let norm_vector = (1.,0.) in
+    let tangent_angle = atan2 (-1.) 0. in
+      let tan_vector = (0., -1.) in*)
+    let norm_angle = atan2 left_dy left_dx in
+    Firebug.console##log (string_of_float norm_angle);
+    let norm_vector = (left_dx,left_dy) in
+    let tangent_angle = atan2 (-.left_dx) left_dy in
+    let tan_vector = (left_dy, -.left_dx) in
+    
+    let v1nb = dot (Ball.get_velocity ball) (norm_vector) in
+    let v1t =  dot (Ball.get_velocity ball) tan_vector in
+    let v1na = -. v1nb in
+    let v1ca = (v1t *. cos tangent_angle +. v1na *. cos norm_angle,
+                v1t *. sin tangent_angle +. v1na *. sin norm_angle
+               ) in
+
+    (*Firebug.console##log (string_of_float v1nb);
+    Firebug.console##log (string_of_float v1na);
+    Firebug.console##log (string_of_float v1t);
+    Firebug.console##log (string_of_float (v1ca|> fst));
+      Firebug.console##log (string_of_float (v1ca|> snd));*)
+
+
+    (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
+  else if x1 >= table_right -. (Ball.get_radius ball) then
+    (*let norm_angle = atan2 0. (-1.) in
+    let norm_vector = (-1.,0.) in
+    let tangent_angle = atan2 (1.) 0. in
+      let tan_vector = (0., 1.) in *)
+    let norm_angle = atan2 right_dy right_dx in
+    let norm_vector = (right_dx,right_dy) in
+    let tangent_angle = atan2 (left_dx) right_dy in
+    let tan_vector = (right_dy, left_dx) in
+
+
+    let v1nb = dot (Ball.get_velocity ball) (norm_vector) in
+    let v1t = dot (Ball.get_velocity ball) tan_vector in
+    let v1na = -. v1nb in
+    let v1ca = (v1t *. cos tangent_angle +. v1na *. cos norm_angle,
+                v1t *. sin tangent_angle +. v1na *. sin norm_angle
+               ) in
+    (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
+  else if y1 >= table_bot -. (Ball.get_radius ball) then
+    let norm_angle = atan2 bot_dy bot_dx in
+    let norm_vector = (bot_dx,bot_dy) in
+    let tangent_angle = atan2 (-.bot_dx) bot_dy in
+    let tan_vector = (bot_dy, -.bot_dx) in
+
+    let v1nb = dot (Ball.get_velocity ball) (norm_vector) in
+    let v1t = dot (Ball.get_velocity ball) tan_vector in
+    let v1na = -. v1nb in
+    let v1ca = (v1t *. cos tangent_angle +. v1na *. cos norm_angle,
+                v1t *. sin tangent_angle +. v1na *. sin norm_angle
+               ) in
+    (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
+  else if y1 <= table_top +. (Ball.get_radius ball) then
+    let norm_angle = atan2 top_dy top_dx in
+    let norm_vector = (top_dx,top_dy) in
+    let tangent_angle = atan2 (-.top_dx) top_dy in
+    let tan_vector = (top_dy, -.top_dx) in
+    let v1nb = dot (Ball.get_velocity ball) (norm_vector) in
+    let v1t = dot (Ball.get_velocity ball) tan_vector in
+    let v1na = -. v1nb in
+    let v1ca = (v1t *. cos tangent_angle +. v1na *. cos norm_angle,
+                v1t *. sin tangent_angle +. v1na *. sin norm_angle
+               ) in
+    (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
+
+  else
+    (Ball.get_id ball,  (0.0, 0.0))
+  
+  
 
 let compute_collisions (ball_list: Ball.t list) =
-  let rec collision_h2 ball_list ball (cur_index:int)
-      (max_index:int) (acc) =
+  let rec collision_h2 ball_list ball (cur_index:int) (max_index:int) (acc) =
     match ball_list with
     | [] -> acc
     | h::t ->
@@ -124,12 +285,10 @@ let compute_collisions (ball_list: Ball.t list) =
             Ball.print_ball ball';
               Ball.print_ball ball;*)
             let new_acc = 
-              (*(IntMap.add (Ball.get_id h') h' acc)
-                |> IntMap.add (Ball.get_id ball') ball'*)
-              (update h_id' h_diff acc) |> (update ball_id' ball_diff)
+              ((update h_id' h_diff (fst acc)) |> (update ball_id' ball_diff),
+               Hit(h)::Hit(ball)::(snd acc)
+              )
             in
-            (*(BallSet.remove h acc) |> (BallSet.remove ball)
-              |> (BallSet.add h') |> (BallSet.add ball')*)
               collision_h2 t ball (cur_index+1) max_index new_acc
         end
       else
@@ -139,24 +298,26 @@ let compute_collisions (ball_list: Ball.t list) =
     match ball_list with
     | [] -> acc
     | h::t ->
+      (* Handle wall collisions here, once *)
+      if is_bounce h then
+        begin match bounce h with
+          | (h_id', h_diff) ->
+            let new_acc = ((update h_id' h_diff (fst acc)), Collide(h)::(snd acc)) in
+            collision_h orig_ball_list t (cur_index+1) new_acc
+        end
+      else
       let new_acc = (collision_h2 orig_ball_list h 0 cur_index acc) in
       collision_h orig_ball_list t (cur_index+1) new_acc
 
 
   in
-  (*
-  let init_balls = List.fold_left (fun acc x ->
-      IntMap.add (Ball.get_id x) x acc
-    ) IntMap.empty ball_list
-  in
-*)
-  let ball_v_diffs = (collision_h ball_list ball_list 0 IntMap.empty) in
+  let ball_v_diffs = (collision_h ball_list ball_list 0 (IntMap.empty, [])) in
   (*let new_balls = (collision_h ball_list ball_list 0 init_balls) in*)
   let new_balls = List.fold_left (fun (acc: Ball.t list) x ->
-      if IntMap.mem (Ball.get_id x) ball_v_diffs
+      if IntMap.mem (Ball.get_id x) (fst ball_v_diffs)
       then
         let old_v = Ball.get_velocity x in
-        let v_diff = IntMap.find (Ball.get_id x) ball_v_diffs in
+        let v_diff = IntMap.find (Ball.get_id x) (fst ball_v_diffs) in
         let new_v = sum old_v v_diff in
         let new_ball = Ball.change_velocity x new_v in
         new_ball::acc
@@ -165,9 +326,13 @@ let compute_collisions (ball_list: Ball.t list) =
     ) [] ball_list
   in
 
-  new_balls
+  (new_balls, snd ball_v_diffs)
   (*IntMap.fold (fun k v acc -> v::acc) new_balls []*)
 
+let is_converged ball_list =
+  List.fold_left (fun acc x ->
+      (norm (Ball.get_velocity x) < 0.001) && acc
+    ) true ball_list
 
 
 
@@ -192,8 +357,8 @@ let simulate_timestep ball_list ts : (Ball.t list * event list)=
   let moved_ball_list2 =
     List.fold_left (fun acc x ->
         (Ball.update_position x ts |> (apply_friction ts))::acc
-    ) [] collision_ball_list
+    ) [] (fst collision_ball_list)
   in
 
 
-  (moved_ball_list2, [])
+  (moved_ball_list2, snd collision_ball_list)

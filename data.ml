@@ -73,7 +73,12 @@ let sq32 = radius *. (sqrt 3.)
 
 let eight_ball_init_ball_pos =
   (*TODO add stripe/solid/cue/black to constructor after updated in ball.ml*)
-  [create_ball "Cue" 0  Cue     "img/0.png" (-300.0, 3.0) (width *. 3. /. 4., height /. 2.) (weight*.1.1) radius; (*Cue*)
+  [
+    create_ball "Cue" 0  Cue     "img/0.png" (-.100.0, -0.0) (width *. 1. /. 4.,  512.-. 26.) (weight*.1.1) radius; (*Cue*)
+    
+
+    (*
+    create_ball "Cue" 0  Cue     "img/0.png" (-450.0, -8.0) (width *. 3. /. 4., height /. 2.) (weight*.1.1) radius; (*Cue*)
    create_ball "9"   9  Stripe  "img/9.png" init_vel (width /. 4. +. (2. *. sq32), height /. 2.) weight radius; (*Stripe*) 
    create_ball "7"   7  Solid   "img/7.png" init_vel (width /. 4. +. sq32, height /. 2. -. radius) weight radius; (*Solid*)
    create_ball "12" 12  Stripe  "img/12.png" init_vel (width /. 4. +. sq32, height /. 2. +. radius) weight radius; (*Stripe*)
@@ -95,7 +100,7 @@ create_ball "3"   3  Solid   "img/3.png" init_vel (width /. 4. -. sq32, height /
    create_ball "13" 13  Stripe  "img/13.png" init_vel (width /. 4. -. (2. *. sq32), height /. 2.) weight radius; (*Stripe*)
    create_ball "4"   4  Solid   "img/4.png" init_vel (width /. 4. -. (2. *. sq32), height /. 2. +. (2. *. radius)) weight radius; (*Solid*)
    create_ball "5"   5  Solid   "img/5.png" init_vel (width /. 4. -. (2. *. sq32), height /. 2. +. (4. *. radius)) weight radius; (*Solid*)
-   
+    *)
   ]
 
 let init_state (g:game_type) : state =
