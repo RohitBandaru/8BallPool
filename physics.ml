@@ -114,12 +114,16 @@ let bot_dy = 1.
 (* dx, dy for boucning off the pool pocket walls *)
 let ne_dx = 0.5**0.5
 let ne_dy = -.(0.5 ** 0.5)
+let nw_dx = 0.5**0.5
+let nw_dy = (0.5 ** 0.5)
+
 (*let ne_dx = 1.
   let ne_dy = 0.*)
 
 
 let rim_width = 22.
 let pocket_radius = 32.
+let center_pocket_radius = 28.
 (* coordinate of the bottom part of the top holes *)
 let top_rim_offset = 19.
 let bottom_rim_offset = 512. -. top_rim_offset
@@ -128,7 +132,7 @@ let pocket_top_y = table_bot +. top_rim_offset -. pocket_radius
 let pocket_bot_y = table_top -. top_rim_offset +. pocket_radius
 let pocket_left_x = table_left -. rim_width
 let pocket_right_x = table_right +. rim_width
-let pocket_middle_x = (table_right +. table_left) /. 2.
+let pocket_middle_x = 506.
 
 
 
@@ -142,33 +146,182 @@ let pocket_se = (pocket_right_x, pocket_bot_y)
 
 let is_bounce ball =
   let (bx, by) = Ball.get_position ball in
-  if  bx <= table_left +. Ball.get_radius ball &&
+  let r = Ball.get_radius ball in
+  let norm_r = r /. (0.8) in
+  if
+    (* special angled bouncing *)
+    (
+    (* NE pocket, bottom wall, right -> up *)
+      bx >= table_right -. Ball.get_radius ball
+      && (by >= top_rim_offset -. r&& by <= top_rim_offset +. rim_width) &&
+      ((by-. (table_top +. top_rim_offset +. rim_width)) +.( bx -. table_right +. 1.5 *. rim_width ) >= norm_r)
+
+      ||
+      (* SW pocket, top awll, left -> down *)
+      bx <= table_left +. Ball.get_radius ball &&
 
       ((by <= bottom_rim_offset && by >= bottom_rim_offset -. rim_width) &&
-       (by-. ( bottom_rim_offset)) +.( bx -. table_left +. rim_width) <= (Ball.get_radius ball) /. (0.5 ** 0.5))
+       (by-. ( bottom_rim_offset)) +.( bx -. table_left +. rim_width) <= norm_r)
 
-    ||bx >= table_right -. Ball.get_radius ball
-      && (by >= top_rim_offset && by <= top_rim_offset +. rim_width) &&
-      ((by >= top_rim_offset && by <= top_rim_offset +. rim_width) &&
-      (by-. (table_top +. top_rim_offset)) +.( bx -. table_right ) <=0.)
 
-    (*bx >= table_right -. Ball.get_radius ball*)
-   || by >= table_bot -. (Ball.get_radius ball) || by <= table_top +. (Ball.get_radius ball)
+      ||
+      (* SW pocket, bottom wall, down -> left *)
+      by >= table_bot -. (Ball.get_radius ball) &&
+      ((bx <= rim_width +. 2. && bx >= 0.) &&
+       (by -. (table_bot +. 0.0 *. rim_width) +. (bx -. table_left) >= norm_r)
+      )
+
+      ||
+      (* NE pocket, top wall, up -> right *)
+      by <= table_top +. (Ball.get_radius ball) &&
+      ((bx >= (pocket_right_x -. pocket_radius -. rim_width) && bx <= pocket_right_x -. pocket_radius) &&
+       (bx -. (pocket_right_x -. pocket_radius -. rim_width) +. (by -.table_top) <= norm_r)
+      )
+      ||
+      (* NW pocket, top wall, up -> left *)
+      by <= table_top +. r &&
+      (bx >= 0. && by <= rim_width +. 2.) &&
+      ((by +. rim_width) -. (by) <= 0. )
+      ||
+      (* NW pocket, bottom wall, left -> up *)
+      bx <= table_left +. r &&
+      (by >= top_rim_offset -. r&& by <= top_rim_offset +. rim_width) &&
+      ((by-. (table_top +. top_rim_offset +. rim_width)) +.( bx -. table_left +. 1.5 *. rim_width ) >= norm_r)
+
+      (* SE pocket, top wall, right -> down *)
+      ||
+      bx >= table_right -. r &&
+
+      ((by <= bottom_rim_offset && by >= bottom_rim_offset -. rim_width) &&
+       (by-. ( bottom_rim_offset)) +.( bx -. table_right +. rim_width) >= norm_r)
+
+      ||
+      (* SE pocket, bottom wall, down -> right *)
+      by >= table_bot -. r &&
+      ((bx >= (pocket_right_x -. pocket_radius -. rim_width) && bx <= pocket_right_x -. pocket_radius) &&
+       (bx -. (pocket_right_x -. pocket_radius -. rim_width) +. (by -.table_bot) >= norm_r)
+      )
+      (* N pocket, left wall, up -> right *)
+      ||
+      (by <= table_top +. r ) &&
+      (
+        (bx <= pocket_middle_x +.center_pocket_radius +. rim_width
+         && bx >= pocket_middle_x -. center_pocket_radius -. rim_width) &&
+        (
+          bx -. (pocket_middle_x -.center_pocket_radius) +. (by -. table_top) <= norm_r
+        )
+      )
+
+      (* S pocket, left wall, down -> right *)
+      ||
+      ( by >= table_bot -. r) &&
+      (
+        (bx <= pocket_middle_x +. pocket_radius +. rim_width
+         && bx >= pocket_middle_x -. center_pocket_radius -. rim_width) &&
+        (
+          bx -. (pocket_middle_x -. center_pocket_radius) -. (by -. table_bot) <= norm_r
+        )
+      )
+
+      ||
+      (* N pocket, right wall, up -> left *)
+      (by <= table_top +. r) &&
+      (
+        (bx <= pocket_middle_x +. pocket_radius +. rim_width
+         && bx >= pocket_middle_x -.center_pocket_radius-. rim_width) &&
+        (
+          bx -. (pocket_middle_x +. center_pocket_radius ) -. (by -. table_top-. rim_width) >= norm_r
+        )
+      )
+
+||
+      (* S pocket, right wall, down -> left *)
+      
+      (by >= table_bot -. r) &&
+      (
+        (bx <= pocket_middle_x +.center_pocket_radius +. rim_width
+         && bx >= pocket_middle_x -. center_pocket_radius-. rim_width) &&
+        (
+          bx -. (pocket_middle_x +. center_pocket_radius ) +. (by -. table_bot +. rim_width) >= norm_r
+        )
+      )
+
+      
+      
+    ) ||
+    (* regular wall bouncing, not near pockets *)
+    (
+      (bx >= table_right -.r && (true && by >= top_rim_offset +. rim_width)) ||
+      (bx <= table_left +.r &&  (true && by >= top_rim_offset +. rim_width)) ||
+      (by >= table_bot -.r &&
+       (bx <= (pocket_right_x -. pocket_radius -. rim_width) && bx >= rim_width)
+       &&
+       (bx >= pocket_middle_x +. center_pocket_radius +. rim_width ||
+        bx <= pocket_middle_x -.center_pocket_radius -. rim_width)
+      ) ||
+      (by <= table_top +.r &&
+       (bx <= (pocket_right_x -. pocket_radius -. rim_width) && bx >= rim_width)
+       &&
+       (bx >= pocket_middle_x +. center_pocket_radius +. rim_width ||
+        bx <= pocket_middle_x -. center_pocket_radius -. rim_width)
+      )
+    )
+
   then true
-  else false
-
+  else
+    
+    false
+    
 let bounce ball =
 (* Algorithm comes fom http://www.petercollingridge.co.uk/pygame-physics-simulation/collisions *)
   let (x1, y1) = Ball.get_position ball in
+  let r = Ball.get_radius ball in
+  let norm_r = r /. 0.8 in
   (*if x1 <= 76. then*)
   
-  if (x1 >= table_right -. Ball.get_radius ball
-      && (y1 >= top_rim_offset && y1 <= top_rim_offset +. rim_width) &&
-      (y1-. (table_top +. top_rim_offset)) +.( x1 -. table_right ) <= 0. )
-     ||
-     (x1 <= table_left +. Ball.get_radius ball
-      && (y1 <= bottom_rim_offset && y1 >= bottom_rim_offset -. rim_width) &&
-      (y1-. ( bottom_rim_offset)) +.( x1 -. table_left ) <= Ball.get_radius ball )
+  if
+    (* NE pocket, top wall, right -> up *)
+    (x1 >= table_right -. Ball.get_radius ball
+     && (y1 >= top_rim_offset -. r && y1 <= top_rim_offset +. rim_width) &&
+     (y1-. (table_top +. top_rim_offset +. rim_width)) +.( x1 -. table_right +. 1.5 *. rim_width ) >=norm_r)
+    ||
+    (* NE pocket, top wall, up -> right *)
+    (y1 <= table_top +. r &&
+     (x1 >= (pocket_right_x -. pocket_radius -. rim_width) && x1 <= pocket_right_x -. pocket_radius) &&
+     (y1 -. (pocket_right_x -. pocket_radius -. rim_width) +. (x1 -.table_top) <= norm_r)
+    )
+    ||
+    (* SW pocket, top awll, left -> down *)
+    (x1 <= table_left +. Ball.get_radius ball
+     && (y1 <= bottom_rim_offset && y1 >= bottom_rim_offset -. rim_width) &&
+     (y1-. ( bottom_rim_offset)) +.( x1 -. table_left +. rim_width ) <= norm_r )
+    ||
+    (* SW pocket, bottom wall, down -> left *)
+    (y1 >= table_bot -. Ball.get_radius ball
+     && (x1 <= rim_width +. 2. && x1 >= 0.) &&
+     (y1 -. (table_bot -. 1.0 *. rim_width) +. (x1 -. table_left) >=0.)
+    )
+    (* N, left wall, up -> right*)
+    ||
+    (y1 <= table_top +. r) &&
+    (
+      (x1 <= pocket_middle_x +. center_pocket_radius +. rim_width
+       && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width) &&
+      (
+        x1 -. (pocket_middle_x -. center_pocket_radius ) +. (y1 -. table_top) <= norm_r
+      )
+    )
+    ||
+    (* S pocket, right wall, down -> left *)
+    (y1 >= table_bot -. r) &&
+    (
+      (x1 <= pocket_middle_x +. center_pocket_radius +. rim_width
+       && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width) &&
+      (
+        x1 -. (pocket_middle_x +. center_pocket_radius ) +. (y1 -. table_bot+. rim_width) >= norm_r
+      )
+      )
+    
      
   then 
     (*let norm_angle = atan2 0. 1. in
@@ -189,7 +342,68 @@ let bounce ball =
                ) in
     (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
   else
+  if
+    (* NW pocket, top wall, up -> left *)
+    (y1 <= table_top +. r &&
+     (x1 >= 0. && x1 <= rim_width +. 2.) &&
+     ((y1 +. rim_width) -. (x1) <= norm_r )
+    )
+    ||
+    (* NW pocket, bottom wall, left -> up *)
+    x1 <= table_left +. r &&
+    (y1 >= top_rim_offset -. r&& y1 <= top_rim_offset +. rim_width) &&
+    ((y1-. (table_top +. top_rim_offset +. rim_width)) +.( x1 -. table_left +. 1.5 *. rim_width ) >= norm_r)
+    (* SE pocket, top wall, right -> down *)
+    ||
+    x1 >= table_right -. r &&
+    (y1 <= bottom_rim_offset && y1 >= bottom_rim_offset -. rim_width) &&
+    ((y1-. ( bottom_rim_offset)) +.( x1 -. table_right +. rim_width ) >= norm_r)
+    (* SE pocket, bottom wall, down -> right *)
+    ||
+    y1 >= table_bot -. r &&
+    (x1 >= (pocket_right_x -. pocket_radius -. rim_width) && x1 <= pocket_right_x -. pocket_radius) &&
+    (x1 -. (pocket_right_x -. pocket_radius -. rim_width) +. (y1 -.table_bot) >= norm_r)
+    (* N pocket, right wall, up -> left *)
+    ||
+    (y1 <= table_top +. r) &&
+    (
+      (x1 <= pocket_middle_x +. center_pocket_radius +. rim_width
+       && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width) &&
+      (
+        x1 -. (pocket_middle_x +. center_pocket_radius ) -. (y1 -. table_top-. rim_width) >= norm_r
+      )
+    )
+    (* S pocket, left wall, down -> right*)
+    ||
+    (y1 >= table_bot -. r) &&
+    (
+      (x1 <= pocket_middle_x +. center_pocket_radius +. rim_width
+       && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width) &&
+      (
+        x1 -. (pocket_middle_x -. center_pocket_radius) -. (y1 -. table_bot) <= norm_r
+      )
+    )
+    
+  then
+
+    let norm_angle = atan2 nw_dy nw_dx in
+    Firebug.console##log (string_of_float norm_angle);
+    let norm_vector = (nw_dx,nw_dy) in
+    let tangent_angle = atan2 (-.nw_dx) nw_dy in
+    let tan_vector = (nw_dy, -.nw_dx) in
+
+    let v1nb = -.dot (Ball.get_velocity ball) (norm_vector) in
+    let v1t =  -.dot (Ball.get_velocity ball) tan_vector in
+    let v1na = -. v1nb in
+    let v1ca = (v1t *. cos tangent_angle +. v1na *. cos norm_angle,
+                v1t *. sin tangent_angle +. v1na *. sin norm_angle
+               ) in
+    (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
+  else 
+    
   if x1 <= table_left +. Ball.get_radius ball
+  && y1 <= (bottom_rim_offset -. rim_width)
+  && y1 >= top_rim_offset +. rim_width
   then 
     (*let norm_angle = atan2 0. 1. in
     let norm_vector = (1.,0.) in
@@ -216,7 +430,13 @@ let bounce ball =
 
 
     (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
-  else if x1 >= table_right -. (Ball.get_radius ball) then
+  else
+  if x1 >= table_right -. (Ball.get_radius ball)
+  && y1 <= (bottom_rim_offset -. rim_width)
+  && y1 >= top_rim_offset +. rim_width
+
+
+  then
     (*let norm_angle = atan2 0. (-1.) in
     let norm_vector = (-1.,0.) in
     let tangent_angle = atan2 (1.) 0. in
@@ -234,7 +454,13 @@ let bounce ball =
                 v1t *. sin tangent_angle +. v1na *. sin norm_angle
                ) in
     (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
-  else if y1 >= table_bot -. (Ball.get_radius ball) then
+  else if y1 >= table_bot -. (Ball.get_radius ball)
+       && x1 >= rim_width
+       && x1 <= pocket_right_x -. pocket_radius -. rim_width
+       && not (x1 <= pocket_middle_x +. center_pocket_radius +. rim_width
+               && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width) 
+
+  then
     let norm_angle = atan2 bot_dy bot_dx in
     let norm_vector = (bot_dx,bot_dy) in
     let tangent_angle = atan2 (-.bot_dx) bot_dy in
@@ -247,7 +473,14 @@ let bounce ball =
                 v1t *. sin tangent_angle +. v1na *. sin norm_angle
                ) in
     (Ball.get_id ball,  (diff v1ca (Ball.get_velocity ball)))
-  else if y1 <= table_top +. (Ball.get_radius ball) then
+  else if y1 <= table_top +. (Ball.get_radius ball)
+       && x1 >= rim_width
+       && x1 <= pocket_right_x -. pocket_radius -. rim_width
+       && not (x1 <= pocket_middle_x +. center_pocket_radius +. rim_width
+               && x1 >= pocket_middle_x -. center_pocket_radius -. rim_width) 
+
+  then
+
     let norm_angle = atan2 top_dy top_dx in
     let norm_vector = (top_dx,top_dy) in
     let tangent_angle = atan2 (-.top_dx) top_dy in
