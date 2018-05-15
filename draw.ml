@@ -220,25 +220,24 @@ let draw canvas =
   ()
 
 let move canvas =
-  Firebug.console##log (Printf.sprintf "move %f" !power);
-  let move = (!power*.1000.,!stick_angle) in
-  let test_move = (100.,0.0) in
+  let speed = (!power/.100.)*.(1000.) in
+  Firebug.console##log (Printf.sprintf "speed %f" speed);
   let ball_lst = ball_locations (!cur_state) in
-  cur_state := (get_logic !cur_state, List.map 
-    (fun b -> if get_id b = 0 then change_velocity b move else b ) ball_lst);
+  cur_state := update_cue_ball_velocity !cur_state ((speed *. (cos (!stick_angle+.pi))),
+    (speed *. (sin (!stick_angle+.pi))));
+  (*cur_state := (get_logic !cur_state, List.map 
+    (fun b -> if get_id b = 0 then change_velocity b move else b ) ball_lst);*)
   power := 0.0;
+  cur_mode := SIMULATE;
   ()
 
 let keydown canvas event =
   let () = match event##.keyCode with
     | 13 -> (* enter *)if (!power > 10.) then
-        cur_state := update_cue_ball_velocity !cur_state ((!power *. (cos !stick_angle)),(!power *. (sin !stick_angle)));
-        power := 0.;
-        cur_mode := SIMULATE;
         move canvas
     | 37 -> stick_angle := !stick_angle -. 0.1;
       draw_stick canvas(* left *)
-    | 38 -> (* up *) if (!power < 100.) then power := !power +. 1.0;
+    | 38 -> (* up *) if (!power < 100.) then power := !power +. 10.0;
       draw_stick canvas
     | 39 -> stick_angle := !stick_angle +. 0.1;
       draw_stick canvas(* left *)
@@ -311,11 +310,6 @@ let mouseup canvas event =
 
 let rec loop canvas =
   draw canvas;
-  let balls = get_balls !cur_state in
-        List.iter
-        (fun b -> debug (Printf.sprintf
-          "[id: %d, xcor %f, ycor %f]\n" (get_id b) (fst (get_position b)) (snd (get_position b))) ) balls;
-        debug "/////////////////////////////////////////////////////////////////";
   let logic = get_logic !cur_state in
   let balls = get_balls !cur_state in
   let tdelta = 0.001 in
