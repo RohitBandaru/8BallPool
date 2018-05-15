@@ -193,7 +193,7 @@ let valid_pos position =
   let x = fst position in
   let y = snd position in
   let fake_ball = create_ball "Cue" 0  Cue "img/0.png" (0.,0.) position 0.156 ball_rad; (*Cue*) in
-  not ((List.exists (fun x -> is_overlap x fake_ball) (get_balls !cur_state)) ||
+  not ((List.exists (fun x -> if (get_id x <> 0) then is_overlap x fake_ball else false) (get_balls !cur_state)) ||
        (x < ball_rad || x > 1024. -. ball_rad || y < ball_rad || y > 512. -. ball_rad))
 
 let handle_invalid_scratch _ =
