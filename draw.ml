@@ -7,6 +7,12 @@ module Html = Dom_html
 let jstr = Js.string
 let document = Html.window##.document
 
+type mode =
+  | PTURN
+  | SCRATCH
+  | SIMULATE
+  | GAMEOVER
+
 let pi = acos (-1.)
 
 let bg_color = jstr "#BDC3C7"
@@ -22,13 +28,15 @@ let init_pos = eight_ball_init_ball_pos
 
 let cur_state = ref (init_state EightBall)
 
-let scratch = ref (get_logic !cur_state).scratch
+let cur_mode = ref PTURN
 
 let mouseX = ref 0.
 
 let mouseY = ref 0.
 
-let table_off = 76.
+let rail_off = 76.
+
+let table_off = 75.
 
 let test_ball =
   match init_pos with
@@ -43,12 +51,20 @@ let stick_color = jstr "blue"
 let stick_angle = ref 0.0
 let power = ref 0.0
 
+let debug str =
+  Firebug.console##log str
+
 let draw_background canvas =
   let ctx = canvas##getContext (Html._2d_) in
+  let cw = float canvas##.width in
+  let ch = float canvas##.height in
+
   let tablesrc = jstr "img/table-scaled.png" in
   let tableimg = Html.createImg document in
+  ctx##.fillStyle := jstr("LightSteelBlue ");
+  ctx##fillRect 0. 0. cw ch;
   tableimg##.src := tablesrc;
-  ctx##drawImage tableimg 0. 0.
+  ctx##drawImage tableimg table_off table_off
 
 let draw_board canvas =
   let ctx = canvas##getContext (Html._2d_) in
@@ -63,10 +79,10 @@ let draw_board canvas =
 
 let draw_ball canvas ball off =
   let ctx = canvas##getContext (Html._2d_) in
-  let t_o = table_off in
+  let t_o = table_off +. rail_off in
   let (bx', by') = get_position ball in
   let (bx, by) =
-  if !scratch && get_id ball = 0 then (!mouseX, !mouseY) else (bx'+.t_o, by'+.t_o) in
+  if !cur_mode = SCRATCH && get_id ball = 0 then (!mouseX, !mouseY) else (bx'+.t_o, by'+.t_o) in
     let brad = 11.4 in
     let ballsrc = jstr (get_color ball) in
     let ballimg = Html.createImg document in
@@ -78,7 +94,7 @@ let draw_ball canvas ball off =
     ctx##fill *)
 
 let draw_state canvas =
-  let ball_lst = ball_locations !cur_state in
+  let ball_lst = get_balls !cur_state in
   List.iter (fun b -> draw_ball canvas b 0. ) ball_lst
 
 let draw_stick canvas =
@@ -86,19 +102,46 @@ let draw_stick canvas =
   let stick_length = 300. in
   let brad = 11.4 in
   let ctx = canvas##getContext (Html._2d_) in
+  let rail_off = table_off +. rail_off in
     ctx##beginPath;
-    ctx##moveTo (fst cue_pos +. table_off +.  (brad+. !power)*.(cos !stick_angle))
-      (snd cue_pos +. table_off +.  (brad +. !power)*.(sin !stick_angle));
-    ctx##lineTo (fst cue_pos +. table_off +. (brad +. stick_length +. !power)*.(cos !stick_angle))
-      (snd cue_pos +. table_off +. (brad +. stick_length +. !power)*.(sin !stick_angle));
+    ctx##moveTo (fst cue_pos +. rail_off +.  (brad+. !power)*.(cos !stick_angle))
+      (snd cue_pos +. rail_off +.  (brad +. !power)*.(sin !stick_angle));
+    ctx##lineTo (fst cue_pos +. rail_off +. (brad +. stick_length +. !power)*.(cos !stick_angle))
+      (snd cue_pos +. rail_off +. (brad +. stick_length +. !power)*.(sin !stick_angle));
     ctx##.lineWidth := 7.;
     ctx##.fillStyle := stick_color;
     ctx##stroke
+
+let draw_hud canvas =
+  let ctx = canvas##getContext (Html._2d_) in
+  let txt8ballsrc   = jstr "img/txt-8ball.png" in
+  let txtp1turnsrc  = jstr "img/txt-player1turn.png" in
+  let txtp2turnsrc  = jstr "img/txt-player2turn.png" in
+  let txtscratchsrc = jstr "img/txt-scratch.png" in
+  let txtb2sinksrc  = jstr "img/txt-ballstosink.png" in
+  let txt8ballimg   = Html.createImg document in
+  let txtp1turnimg  = Html.createImg document in
+  let txtp2turnimg  = Html.createImg document in
+  let txtscratchimg = Html.createImg document in
+  let txtb2sinkimg  = Html.createImg document in
+  txt8ballimg##.src   := txt8ballsrc;
+  txtp1turnimg##.src  := txtp1turnsrc;
+  txtp2turnimg##.src  := txtp2turnsrc;
+  txtscratchimg##.src := txtscratchsrc;
+  txtb2sinkimg##.src  := txtb2sinksrc;
+  ctx##drawImage_withSize txt8ballimg 0. 0. 250. 75.;
+  ctx##drawImage_withSize txtp1turnimg table_off 740. 210. 60.;
+  ctx##drawImage_withSize txtp2turnimg (table_off+.1000.) 740. 210. 60.;
+  ctx##drawImage_withSize txtscratchimg (table_off +.500.) 740. 180. 60.;
+  ctx##drawImage_withSize txtb2sinkimg table_off 780. 240. 60.;
+  ctx##drawImage_withSize txtb2sinkimg (table_off+.1000.) 780. 240. 60.
+
 
 let draw canvas =
   draw_background canvas;
   draw_state canvas;
   draw_stick canvas;
+  draw_hud canvas;
   ()
 
 let move canvas =
@@ -116,8 +159,22 @@ let keydown canvas event =
       draw_stick canvas(* left *)
     | 40 -> (* down *)if (!power > 0.) then power := !power -. 1.0;
       draw_stick canvas
-    | 82 -> (* s key *) scratch := not !scratch
-    | _ -> Firebug.console##log (Printf.sprintf "scratch %b" !scratch)
+    | 82 -> (* r key *) cur_mode := SCRATCH
+    | 83 -> (* s key *)
+      begin
+        let logic = get_logic !cur_state in
+        let balls = get_balls !cur_state in
+        let tdelta = 0.001 in
+        cur_state := (logic, fst (simulate_timestep balls tdelta))
+      end
+    | _ ->
+      begin
+        let balls = get_balls !cur_state in
+        List.iter
+        (fun b -> debug (Printf.sprintf
+          "[id: %d, xcor %f, ycor %f]\n" (get_id b) (fst (get_position b)) (snd (get_position b))) ) balls;
+        debug "/////////////////////////////////////////////////////////////////"
+      end
   in Js._true
 
 let mousemove canvas event =
@@ -133,10 +190,6 @@ let valid_pos position =
   (* TODO validate if the ball is within bounds of the table, and not in any pockets fall range *)
   true
 
-let update_cue_pos position =
-  (* TODO udpate the state with new ball position *)
-  ()
-
 let handle_invalid_scratch _ =
   (* TODO display some sort of error message indicating scratch pos was out of bounds *)
   ()
@@ -149,8 +202,8 @@ let mouseup canvas event =
   let _ =
     if valid_pos (canvasX, canvasY) then
       begin
-        update_cue_pos ();
-        scratch := false
+        update_cue_ball_position !cur_state (canvasX, canvasY);
+        cur_mode := PTURN
       end
     else
       handle_invalid_scratch ()
@@ -161,7 +214,7 @@ let rec loop canvas =
   let logic = get_logic !cur_state in
   let balls = get_balls !cur_state in
   let tdelta = 0.001 in
-  cur_state := (logic, fst (simulate_timestep balls tdelta) );
+  (* cur_state := (logic, fst simulate_timestep balls); *)
   Html.window##requestAnimationFrame(
     Js.wrap_callback (fun (t:float) -> loop canvas)) |> ignore
 
