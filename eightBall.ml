@@ -24,7 +24,8 @@ let next_turn (s:logic_state) : logic_state =
 
 (*remove a ball from the list of balls*)
 let remove_ball (b : ball) (l: (int * b_type) list) : (int * b_type) list =
-  List.filter (fun x -> fst x <> get_id b) l
+  let ball_list = List.filter (fun x -> fst x <> get_id b) l in
+  if ball_list = [] then [(8, Black)] else ball_list
 
 (*get the opposite type of Stripes/Solids*)
 let opposite_group (g:b_type) : b_type =
@@ -43,11 +44,11 @@ let resolve_sink (s:logic_state) (b:ball) : logic_state =
       let p = s.player in
         {s with
           player =
-            if (p.balls_left = [] && s.ob = get_id b)
+            if (p.balls_left = [(8, Black)] && s.ob = get_id b)
               then {p with status = Won;}
             else {p with status = Lost;};
           other_player =
-            if (p.balls_left = [] && s.ob = get_id b)
+            if (p.balls_left = [(8, Black)] && s.ob = get_id b)
               then {s.other_player with status = Lost;}
             else {s.other_player with status = Won;};
           game_over = true;}
