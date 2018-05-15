@@ -53,7 +53,6 @@ let power = ref 0.0
 
 let debug str =
   Firebug.console##log str
-
 let draw_background canvas =
   let ctx = canvas##getContext (Html._2d_) in
   let cw = float canvas##.width in
@@ -93,6 +92,7 @@ let draw_ball canvas ball =
     ctx##fill *)
 
 let draw_stick canvas =
+  
   let cue_pos = get_position (List.find (fun b -> get_id b = 0 ) (get_balls !cur_state)) in
   let stick_length = 300. in
   let brad = 11.4 in
@@ -132,14 +132,20 @@ let draw_cue_scratch canvas =
   ctx##drawImage_withSize ballimg (bx-.brad) (by-.brad) (2.*.brad) (2.*.brad)
 
 let draw_state canvas =
+
   let ball_lst = get_balls !cur_state in
+  Firebug.console##log ("ahh" ^ string_of_int (List.length (ball_lst)));
   match !cur_mode with
   | SCRATCH -> begin
+      Firebug.console##log ("IN SCRATCH STATE");
+
       List.iter (fun b -> draw_ball canvas b )
       (List.filter (fun b -> get_id b <> 0) ball_lst);
       draw_cue_scratch canvas
     end
-  | PTURN -> draw_stick canvas;
+  | PTURN ->
+    Firebug.console##log ("IN PTURN STATE");
+    draw_stick canvas;
       List.iter (fun b -> draw_ball canvas b ) ball_lst
   | GAMEOVER -> draw_gameover canvas;
   | SIMULATE | _ -> List.iter (fun b -> draw_ball canvas b ) ball_lst
@@ -160,22 +166,27 @@ let draw_b2sink canvas =
   let (bx, by) = (table_off +. brad, 845.) in
   List.iteri
     (fun i b_id -> begin
-      let ball = search_ball !cur_state b_id in
-      let (bx', by') = (bx +. (offset *. (float_of_int i)), by) in
-      let ballsrc = jstr (get_color ball) in
-      let ballimg = Html.createImg document in
-      ballimg##.src := ballsrc;
-      ctx##drawImage_withSize ballimg (bx'-.brad) (by'-.brad) (2.*.brad) (2.*.brad)
+         try 
+           let ball = search_ball !cur_state b_id in
+           let (bx', by') = (bx +. (offset *. (float_of_int i)), by) in
+           let ballsrc = jstr (get_color ball) in
+           let ballimg = Html.createImg document in
+           ballimg##.src := ballsrc;
+           ctx##drawImage_withSize ballimg (bx'-.brad) (by'-.brad) (2.*.brad) (2.*.brad)
+         with
+         | _ -> ()
     end ) p1b2s;
   let (bx, by) = (table_off +. 1175. +. brad, 845.) in
   List.iteri
     (fun i b_id -> begin
+         try
       let ball = search_ball !cur_state b_id in
       let (bx', by') = (bx -. (offset *. (float_of_int i)), by) in
       let ballsrc = jstr (get_color ball) in
       let ballimg = Html.createImg document in
       ballimg##.src := ballsrc;
       ctx##drawImage_withSize ballimg (bx'-.brad) (by'-.brad) (2.*.brad) (2.*.brad)
+        with | _ -> ()
     end ) p2b2s
 
 let draw_hud canvas =
@@ -315,7 +326,11 @@ let rec loop canvas =
   let tdelta = 0.001 in
   let _ = match !cur_mode with
   | SIMULATE -> let ball_lst = ball_locations (!cur_state) in
-                if is_converged ball_lst then cur_mode := PTURN
+
+    if
+      
+      is_converged ball_lst then cur_mode := PTURN
+
                 else
                  cur_state := (logic, fst (simulate_timestep ball_lst tdelta));
   | SCRATCH -> ()

@@ -348,7 +348,7 @@ let bounce ball =
     let tangent_angle = atan2 (-1.) 0. in
       let tan_vector = (0., -1.) in*)
     let norm_angle = atan2 ne_dy ne_dx in
-    Firebug.console##log (string_of_float norm_angle);
+
     let norm_vector = (ne_dx,ne_dy) in
     let tangent_angle = atan2 (-.ne_dx) ne_dy in
     let tan_vector = (ne_dy, -.ne_dx) in
@@ -553,6 +553,7 @@ let compute_collisions (ball_list: Ball.t list) =
     | h::t ->
       (* Handle pocketing here, once *)
       if is_pocket h then
+        let _ = Firebug.console##log ("Pocketed " ^ (string_of_int (Ball.get_id h)))in
         begin
           (*TODO remove sinked ball from ball list*)
           let new_acc = (fst acc, Sink (h) ::(snd acc)) in
@@ -609,7 +610,7 @@ let simulate_timestep ball_list ts : (Ball.t list * event list)=
      Then, shift everybody who collided by their velocity * ts...or something.
      Return (updated list, list of interesting events this timestep)
   *)
-
+  Firebug.console##log "begin";
   let moved_ball_list =
     List.fold_left (fun acc x ->
         (Ball.update_position x ts |> (apply_friction ts))::acc
@@ -625,6 +626,5 @@ let simulate_timestep ball_list ts : (Ball.t list * event list)=
         (Ball.update_position x ts |> (apply_friction ts))::acc
     ) [] (fst collision_ball_list)
   in
-
-
+  Firebug.console##log "end";
   (moved_ball_list2, snd collision_ball_list)
