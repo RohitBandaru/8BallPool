@@ -12,6 +12,18 @@ val is_overlap: Ball.t -> Ball.t -> bool
 after they elastically collide
  * requires: is_overlap t1 t2 returns True
 *)
-val collide: Ball.t -> Ball.t -> Ball.t * Ball.t
+(*val collide: Ball.t -> Ball.t -> Ball.t * Ball.t*)
+val collide: Ball.t -> Ball.t -> ((int * (float * float)) * (int * (float * float)))
+
+
+val pocket_nw:  float*float
+val pocket_n:   float*float
+val pocket_ne:  float*float
+val pocket_sw:  float*float
+val pocket_s:   float*float
+val pocket_se:  float*float
+
 
 val simulate_timestep: Ball.t list -> float ->  (Ball.t list * event list)
+
+val compute_collisions: Ball.t list -> (Ball.t list * event list)

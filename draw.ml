@@ -204,11 +204,19 @@ let draw_hud canvas =
     ctx##drawImage_withSize txtscratchimg (table_off +.500.) 740. 180. 60.;
   draw_b2sink canvas
 
+let draw_pocket canvas =
+  let ctx = canvas##getContext (Html._2d_) in
+  let (px, py) = pocket_sw in
+  let pocketsrc = jstr "img/0.png" in
+  let pocketimg = Html.createImg document in
+  pocketimg##.src := pocketsrc;
+  ctx##drawImage_withSize pocketimg (px-.16.) (py-.16.) 32. 32.
 
 let draw canvas =
   draw_background canvas;
   draw_hud canvas;
   draw_state canvas;
+  (* draw_pocket canvas; *)
   ()
 
 let move canvas =
