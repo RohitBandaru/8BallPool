@@ -113,5 +113,12 @@ let get_balls (s:state) : ball list = snd s
 
 let ball_locations (s:state) : ball list = snd s
 
+let search_ball (s:state) (ball_id :int): ball =
+  List.find (fun x -> get_id x = ball_id) (get_balls s)
+
+let update_cue_ball_position (s:state) (ball_pos : float*float) : state =
+  let ball = search_ball s 0 in
+  (fst s, change_position ball ball_pos :: (List.filter  (fun x -> get_id x <> 0) (snd s)))
+
 let next (s:state) : move =
   failwith "Unimplemented"
