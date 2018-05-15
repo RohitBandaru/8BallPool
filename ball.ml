@@ -1,3 +1,5 @@
+open Printf
+
 type b_type  =
   | Cue
   | Solid
@@ -41,7 +43,13 @@ let change_position b p = {b with position = p}
 
 let update_position b ts =
   let new_pos = match b.position, b.velocity with
-    | (x, y), (vx, vy) -> (x +. vx *. ts, y +. vy *. ts)
+    | (x, y), (vx, vy) ->
+      if b.id = 0 then
+        ()
+        (*Firebug.console##log (string_of_float x)*)
+      else ()
+      ;
+      (x +. vx *. ts, y +. vy *. ts)
   in
   {b with position = new_pos}
   
@@ -49,3 +57,8 @@ let create_ball name id group color velocity position mass radius =
   {
     name; id; group; color; velocity; position; mass; radius
   }
+
+let print_ball b =
+  printf "name: %s\n id: %d\n color: %s\n velocity: (%f, %f)\n position: (%f, %f)\n"
+    b.name b.id b.color (b.velocity |> fst) (b.velocity |> snd)
+    (b.position |> fst) (b.position |> snd)
