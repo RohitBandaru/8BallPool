@@ -111,6 +111,13 @@ let get_logic (s:state) : logic_state =
 
 let get_balls (s:state) : ball list = snd s
 
+let get_winner_id (s:state) : int =
+  let logic = get_logic s in
+  let player' = logic.player in
+    if player'.status = Won
+    then player'.id + 1
+    else logic.other_player.id + 1
+
 let ball_locations (s:state) : ball list = snd s
 
 let search_ball (s:state) (ball_id :int): ball =

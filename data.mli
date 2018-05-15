@@ -55,6 +55,8 @@ val get_logic : state -> logic_state
 
 val get_balls : state -> ball list
 
+val get_winner_id : state -> int
+
 val search_ball : state -> int -> ball
 
 val update_cue_ball_position : state ->  float*float -> state
