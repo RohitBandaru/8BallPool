@@ -312,6 +312,8 @@ let mouseup canvas event =
   end
   | _ -> Js._false
 
+let event_list = ref []
+
 let rec loop canvas =
   draw canvas;
   let logic = get_logic !cur_state in
@@ -319,9 +321,15 @@ let rec loop canvas =
   let tdelta = 0.001 in
   let _ = match !cur_mode with
   | SIMULATE -> let ball_lst = ball_locations (!cur_state) in
-                if is_converged ball_lst then cur_mode := PTURN
-                else
-                 cur_state := (logic, fst (simulate_timestep ball_lst tdelta));
+    let (physics, events) = simulate_timestep ball_lst tdelta in
+    if is_converged ball_lst
+    then begin cur_state := (EightBall.next_state logic (!event_list), physics);
+        event_list := [];
+        cur_mode := PTURN
+      end
+    else
+      cur_state := (logic, physics);
+      event_list := List.append events !event_list;
   | SCRATCH -> ()
   | PTURN -> ()
   | GAMEOVER -> ()
