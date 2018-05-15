@@ -198,11 +198,12 @@ let mouseup canvas event =
   let rect = canvas##getBoundingClientRect in
   let canvasX = (float_of_int event##.clientX) -. rect##.left in
   let canvasY = (float_of_int event##.clientY) -. rect##.top in
-
+  let updateX = canvasX -. (table_off+.rail_off) in
+  let updateY = canvasY -. (table_off+.rail_off) in
   let _ =
     if valid_pos (canvasX, canvasY) then
       begin
-        update_cue_ball_position !cur_state (canvasX, canvasY);
+        cur_state := update_cue_ball_position !cur_state (updateX, updateY);
         cur_mode := PTURN
       end
     else
