@@ -91,14 +91,14 @@ let eight_ball_init_ball_pos =
     create_ball "Cue" 7  Cue     "img/0.png" (0.0, 100.0) (24.,  400.) (weight*.1.1) radius; (*Cue*)
     create_ball "Cue" 8  Cue     "img/0.png" (-100.0, 0.0) (200.,  490.) (weight*.1.1) radius; (*Cue*)    
     *)
-    create_ball "Cue" 0  Cue     "img/0.png" (0.0, -200.0) (506.,  512. -.100.) (weight*.1.1) radius; (*Cue*)
+    (*create_ball "Cue" 0  Cue     "img/0.png" (0.0, -200.0) (506.,  512. -.100.) (weight*.1.1) radius; (*Cue*)*)
     (*create_ball "Cue" 1  Cue     "img/0.png" (0.0, 100.0) (534.,  512. -.100.) (weight*.1.1) radius; (*Cue*)
     create_ball "Cue" 2  Cue     "img/0.png" (0.0, -100.0) (478.,  100.) (weight*.1.1) radius; (*Cue*)
       create_ball "Cue" 3  Cue     "img/0.png" (0.0, -100.0) (534.,  100.) (weight*.1.1) radius; (*Cue*)*)
 
 (*create_ball "Cue" 11  Cue     "img/0.png" (0.0, -100.0) (558.,  100.) (weight*.1.1) radius; (*Cue*)*)
     
-(*    
+    
     
     create_ball "Cue" 0  Cue     "img/0.png" (-450.0, 0.) (width *. 3. /. 4., height /. 2.) (weight*.1.1) radius; (*Cue*)
    create_ball "9"   9  Stripe  "img/9.png" init_vel (width /. 4. +. (2. *. sq32), height /. 2.) weight radius; (*Stripe*) 
@@ -122,7 +122,7 @@ create_ball "3"   3  Solid   "img/3.png" init_vel (width /. 4. -. sq32, height /
    create_ball "13" 13  Stripe  "img/13.png" init_vel (width /. 4. -. (2. *. sq32), height /. 2.) weight radius; (*Stripe*)
    create_ball "4"   4  Solid   "img/4.png" init_vel (width /. 4. -. (2. *. sq32), height /. 2. +. (2. *. radius)) weight radius; (*Solid*)
    create_ball "5"   5  Solid   "img/5.png" init_vel (width /. 4. -. (2. *. sq32), height /. 2. +. (4. *. radius)) weight radius; (*Solid*)
-  *)  
+  
   ]
 
 let init_state (g:game_type) : state =

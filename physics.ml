@@ -84,7 +84,7 @@ let collide t1 t2 =
   (*let new_b1 = Ball.update_position (Ball.change_velocity t1 v1ca) 0.0001 in
   let new_b2 = Ball.update_position (Ball.change_velocity t2 v2ca) 0.0001 in
     (new_b1, new_b2)*)
-  
+
 
 
 
@@ -128,20 +128,37 @@ let center_pocket_radius = 28.
 let top_rim_offset = 19.
 let bottom_rim_offset = 512. -. top_rim_offset
 
-let pocket_top_y = table_bot +. top_rim_offset -. pocket_radius
-let pocket_bot_y = table_top -. top_rim_offset +. pocket_radius
+let pocket_top_y = table_top +. top_rim_offset -. pocket_radius
+let pocket_bot_y = table_bot -. top_rim_offset +. pocket_radius
 let pocket_left_x = table_left -. rim_width
 let pocket_right_x = table_right +. rim_width
 let pocket_middle_x = 506.
+let pocket_mid_top_y = table_top -. 30.
+let pocket_mid_bot_y = table_bot +. 30.
 
 
 
 let pocket_nw = (pocket_left_x, pocket_top_y)
 let pocket_sw = (pocket_left_x, pocket_bot_y)
-let pocket_n = (pocket_middle_x, pocket_top_y)
-let pocket_s = (pocket_middle_x, pocket_bot_y)
+let pocket_n = (pocket_middle_x, pocket_mid_top_y)
+let pocket_s = (pocket_middle_x, pocket_mid_bot_y)
 let pocket_ne = (pocket_right_x, pocket_top_y)
 let pocket_se = (pocket_right_x, pocket_bot_y)
+
+
+let collide_pocket ball pocket_pos =
+  let (x1, y1) = Ball.get_position ball in
+  let (x2, y2) = pocket_pos in
+  let r1 = Ball.get_radius ball in
+  (x1 -. x2) ** 2.0 +. (y1 -. y2) ** 2.0 < ( r1 +. pocket_radius) ** 2.0 -. 0.005 (*fudge factor *)
+
+let is_pocket ball =
+  (collide_pocket ball pocket_nw ||
+   collide_pocket ball pocket_n  ||
+   collide_pocket ball pocket_ne ||
+   collide_pocket ball pocket_sw ||
+   collide_pocket ball pocket_s  ||
+   collide_pocket ball pocket_se)
 
 
 let is_bounce ball =
@@ -278,6 +295,7 @@ let bounce ball =
   let r = Ball.get_radius ball in
   let norm_r = r /. 0.8 in
   (*if x1 <= 76. then*)
+
   
   if
     (* NE pocket, top wall, right -> up *)
@@ -324,6 +342,7 @@ let bounce ball =
     
      
   then 
+
     (*let norm_angle = atan2 0. 1. in
     let norm_vector = (1.,0.) in
     let tangent_angle = atan2 (-1.) 0. in
@@ -333,7 +352,7 @@ let bounce ball =
     let norm_vector = (ne_dx,ne_dy) in
     let tangent_angle = atan2 (-.ne_dx) ne_dy in
     let tan_vector = (ne_dy, -.ne_dx) in
-    
+
     let v1nb = -.dot (Ball.get_velocity ball) (norm_vector) in
     let v1t =  -.dot (Ball.get_velocity ball) tan_vector in
     let v1na = -. v1nb in
@@ -402,6 +421,7 @@ let bounce ball =
   else 
     
   if x1 <= table_left +. Ball.get_radius ball
+
   && y1 <= (bottom_rim_offset -. rim_width)
   && y1 >= top_rim_offset +. rim_width
   then 
@@ -414,7 +434,7 @@ let bounce ball =
     let norm_vector = (left_dx,left_dy) in
     let tangent_angle = atan2 (-.left_dx) left_dy in
     let tan_vector = (left_dy, -.left_dx) in
-    
+
     let v1nb = dot (Ball.get_velocity ball) (norm_vector) in
     let v1t =  dot (Ball.get_velocity ball) tan_vector in
     let v1na = -. v1nb in
@@ -495,8 +515,8 @@ let bounce ball =
 
   else
     (Ball.get_id ball,  (0.0, 0.0))
-  
-  
+
+
 
 let compute_collisions (ball_list: Ball.t list) =
   let rec collision_h2 ball_list ball (cur_index:int) (max_index:int) (acc) =
@@ -505,7 +525,7 @@ let compute_collisions (ball_list: Ball.t list) =
     | h::t ->
       (*printf "max_index: %d\n" max_index;
         printf "cur_index %d\n" cur_index;*)
-            
+
       if cur_index >= max_index then
         (*let _ = printf "short-circuit:\n" in*)
       acc
@@ -517,7 +537,7 @@ let compute_collisions (ball_list: Ball.t list) =
             Ball.print_ball h;
             Ball.print_ball ball';
               Ball.print_ball ball;*)
-            let new_acc = 
+            let new_acc =
               ((update h_id' h_diff (fst acc)) |> (update ball_id' ball_diff),
                Hit(h)::Hit(ball)::(snd acc)
               )
@@ -531,8 +551,15 @@ let compute_collisions (ball_list: Ball.t list) =
     match ball_list with
     | [] -> acc
     | h::t ->
+      (* Handle pocketing here, once *)
+      if is_pocket h then
+        begin
+          (*TODO remove sinked ball from ball list*)
+          let new_acc = (fst acc, Sink (h) ::(snd acc)) in
+          collision_h orig_ball_list t (cur_index+1) new_acc
+        end
       (* Handle wall collisions here, once *)
-      if is_bounce h then
+      else if is_bounce h then
         begin match bounce h with
           | (h_id', h_diff) ->
             let new_acc = ((update h_id' h_diff (fst acc)), Collide(h)::(snd acc)) in
@@ -547,7 +574,13 @@ let compute_collisions (ball_list: Ball.t list) =
   let ball_v_diffs = (collision_h ball_list ball_list 0 (IntMap.empty, [])) in
   (*let new_balls = (collision_h ball_list ball_list 0 init_balls) in*)
   let new_balls = List.fold_left (fun (acc: Ball.t list) x ->
-      if IntMap.mem (Ball.get_id x) (fst ball_v_diffs)
+      let has_sunk ball_id =
+        List.exists (fun event -> match event with
+            | Sink b -> get_id b = ball_id
+            | _ -> false)
+          (snd ball_v_diffs) in
+      if (has_sunk (Ball.get_id x)) then acc
+      else if IntMap.mem (Ball.get_id x) (fst ball_v_diffs)
       then
         let old_v = Ball.get_velocity x in
         let v_diff = IntMap.find (Ball.get_id x) (fst ball_v_diffs) in
