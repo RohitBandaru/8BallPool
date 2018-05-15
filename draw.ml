@@ -92,7 +92,7 @@ let draw_ball canvas ball =
     ctx##fill *)
 
 let draw_stick canvas =
-  
+
   let cue_pos = get_position (List.find (fun b -> get_id b = 0 ) (get_balls !cur_state)) in
   let stick_length = 300. in
   let brad = 11.4 in
@@ -166,7 +166,7 @@ let draw_b2sink canvas =
   let (bx, by) = (table_off +. brad, 845.) in
   List.iteri
     (fun i b_id -> begin
-         try 
+         try
            let ball = search_ball !cur_state b_id in
            let (bx', by') = (bx +. (offset *. (float_of_int i)), by) in
            let ballsrc = jstr (get_color ball) in
@@ -231,7 +231,7 @@ let draw canvas =
   draw_background canvas;
   draw_hud canvas;
   draw_state canvas;
-  draw_pocket canvas;
+  (* draw_pocket canvas; *)
   ()
 
 let move canvas =
