@@ -105,9 +105,7 @@ let init_state (g:game_type) : state =
       game_over = false;
     }, eight_ball_init_ball_pos)
 
-let get_logic (s:state) : logic_state =
-  match s with
-  | (logic, _) -> logic
+let get_logic (s:state) : logic_state = fst s
 
 let get_balls (s:state) : ball list = snd s
 
@@ -126,6 +124,10 @@ let search_ball (s:state) (ball_id :int): ball =
 let update_cue_ball_position (s:state) (ball_pos : float*float) : state =
   let ball = search_ball s 0 in
   (fst s, change_position ball ball_pos :: (List.filter  (fun x -> get_id x <> 0) (snd s)))
+
+let update_cue_ball_velocity (s:state) (ball_vel : float*float) : state =
+  let ball = search_ball s 0 in
+  (fst s, change_velocity ball ball_vel :: (List.filter (fun x -> get_id x <> 0) (snd s)))
 
 let next (s:state) : move =
   failwith "Unimplemented"

@@ -60,9 +60,11 @@ val get_winner_id : state -> int
 val search_ball : state -> int -> ball
 
 val update_cue_ball_position : state ->  float*float -> state
+
+val update_cue_ball_velocity : state ->  float*float -> state
+
 (* [ball_locations s] is a list of pool balls and their corresponding locations
  at a given game state. *)
 val ball_locations : state -> ball list
 
 val eight_ball_init_ball_pos : ball list
-
