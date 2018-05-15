@@ -93,7 +93,7 @@ let draw_ball canvas ball =
     ctx##fill *)
 
 let draw_stick canvas =
-  let cue_pos = get_position (List.find (fun b -> get_id b = 0 ) init_pos) in
+  let cue_pos = get_position (List.find (fun b -> get_id b = 0 ) (get_balls !cur_state)) in
   let stick_length = 300. in
   let brad = 11.4 in
   let ctx = canvas##getContext (Html._2d_) in
@@ -216,7 +216,7 @@ let draw canvas =
   draw_background canvas;
   draw_hud canvas;
   draw_state canvas;
-  (* draw_pocket canvas; *)
+  draw_pocket canvas; 
   ()
 
 let move canvas =
@@ -232,7 +232,10 @@ let move canvas =
 let keydown canvas event =
   let () = match event##.keyCode with
     | 13 -> (* enter *)if (!power > 10.) then
-      move canvas;
+        cur_state := update_cue_ball_velocity !cur_state ((!power *. (cos !stick_angle)),(!power *. (sin !stick_angle)));
+        power := 0.;
+        cur_mode := SIMULATE;
+        move canvas
     | 37 -> stick_angle := !stick_angle -. 0.1;
       draw_stick canvas(* left *)
     | 38 -> (* up *) if (!power < 100.) then power := !power +. 1.0;
@@ -269,9 +272,8 @@ let mousemove canvas event =
   (* let _ = Firebug.console##log (Printf.sprintf "canvasx %0.4f canvasy %0.4f" canvasX canvasY)
   in *) Js._true
 
-let ball_rad = 11.4
-
 let valid_pos position =
+  let ball_rad = 11.4 in
   let x = fst position in
   let y = snd position in
   let fake_ball = create_ball "Cue" 0  Cue "img/0.png" (0.,0.) position 0.156 ball_rad; (*Cue*) in
