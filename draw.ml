@@ -186,9 +186,15 @@ let mousemove canvas event =
   (* let _ = Firebug.console##log (Printf.sprintf "canvasx %0.4f canvasy %0.4f" canvasX canvasY)
   in *) Js._true
 
+let ball_rad = 11.4
+
 let valid_pos position =
   (* TODO validate if the ball is within bounds of the table, and not in any pockets fall range *)
-  true
+  let x = fst position in
+  let y = snd position in
+  let fake_ball = create_ball "Cue" 0  Cue "img/0.png" (0.,0.) position 0.156 ball_rad; (*Cue*) in
+  not ((List.exists (fun x -> is_overlap x fake_ball) (get_balls !cur_state)) ||
+       (x < ball_rad || x > 1024. -. ball_rad || y < ball_rad || y > 512. -. ball_rad))
 
 let handle_invalid_scratch _ =
   (* TODO display some sort of error message indicating scratch pos was out of bounds *)
