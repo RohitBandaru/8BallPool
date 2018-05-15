@@ -93,7 +93,7 @@ let draw_ball canvas ball =
     ctx##fill *)
 
 let draw_stick canvas =
-  let cue_pos = get_position (List.find (fun b -> get_id b = 0 ) init_pos) in
+  let cue_pos = get_position (List.find (fun b -> get_id b = 0 ) (get_balls !cur_state)) in
   let stick_length = 300. in
   let brad = 11.4 in
   let ctx = canvas##getContext (Html._2d_) in
@@ -224,15 +224,24 @@ let draw canvas =
   ()
 
 let move canvas =
+  let speed = (!power/.100.)*.(1000.) in
+  Firebug.console##log (Printf.sprintf "speed %f" speed);
+  let ball_lst = ball_locations (!cur_state) in
+  cur_state := update_cue_ball_velocity !cur_state ((speed *. (cos (!stick_angle+.pi))),
+    (speed *. (sin (!stick_angle+.pi))));
+  (*cur_state := (get_logic !cur_state, List.map
+    (fun b -> if get_id b = 0 then change_velocity b move else b ) ball_lst);*)
+  power := 0.0;
+  cur_mode := SIMULATE;
   ()
 
 let keydown canvas event =
   let () = match event##.keyCode with
     | 13 -> (* enter *)if (!power > 10.) then
-      move canvas;
+        move canvas
     | 37 -> stick_angle := !stick_angle -. 0.1;
       draw_stick canvas(* left *)
-    | 38 -> (* up *) if (!power < 100.) then power := !power +. 1.0;
+    | 38 -> (* up *) if (!power < 100.) then power := !power +. 10.0;
       draw_stick canvas
     | 39 -> stick_angle := !stick_angle +. 0.1;
       draw_stick canvas(* left *)
@@ -266,9 +275,8 @@ let mousemove canvas event =
   (* let _ = Firebug.console##log (Printf.sprintf "canvasx %0.4f canvasy %0.4f" canvasX canvasY)
   in *) Js._true
 
-let ball_rad = 11.4
-
 let valid_pos position =
+  let ball_rad = 11.4 in
   let x = fst position in
   let y = snd position in
   let fake_ball = create_ball "Cue" 0  Cue "img/0.png" (0.,0.) position 0.156 ball_rad; (*Cue*) in
@@ -309,7 +317,15 @@ let rec loop canvas =
   let logic = get_logic !cur_state in
   let balls = get_balls !cur_state in
   let tdelta = 0.001 in
-  (* cur_state := (logic, fst simulate_timestep balls); *)
+  let _ = match !cur_mode with
+  | SIMULATE -> let ball_lst = ball_locations (!cur_state) in
+                if is_converged ball_lst then cur_mode := PTURN
+                else
+                 cur_state := (logic, fst (simulate_timestep ball_lst tdelta));
+  | SCRATCH -> ()
+  | PTURN -> ()
+  | GAMEOVER -> ()
+  in
   Html.window##requestAnimationFrame(
     Js.wrap_callback (fun (t:float) -> loop canvas)) |> ignore
 

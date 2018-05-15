@@ -28,3 +28,6 @@ val pockets: (float*float) list
 val simulate_timestep: Ball.t list -> float ->  (Ball.t list * event list)
 
 val compute_collisions: Ball.t list -> (Ball.t list * event list)
+
+val is_converged: Ball.t list -> bool
+
