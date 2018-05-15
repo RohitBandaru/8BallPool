@@ -192,7 +192,7 @@ let valid_pos position =
 
 let handle_invalid_scratch _ =
   (* TODO display some sort of error message indicating scratch pos was out of bounds *)
-  ()
+  debug "ope that was an invalid scratch"
 
 let mouseup canvas event =
   let rect = canvas##getBoundingClientRect in
@@ -201,10 +201,10 @@ let mouseup canvas event =
   let updateX = canvasX -. (table_off+.rail_off) in
   let updateY = canvasY -. (table_off+.rail_off) in
   let _ =
-    if valid_pos (canvasX, canvasY) then
+    if valid_pos (updateX, updateY) then
       begin
         cur_state := update_cue_ball_position !cur_state (updateX, updateY);
-        cur_mode := PTURN
+        cur_mode  := PTURN
       end
     else
       handle_invalid_scratch ()
