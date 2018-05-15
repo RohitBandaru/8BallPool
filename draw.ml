@@ -216,7 +216,7 @@ let draw canvas =
   draw_background canvas;
   draw_hud canvas;
   draw_state canvas;
-  draw_pocket canvas; 
+  (*draw_pocket canvas; *)
   ()
 
 let move canvas =
