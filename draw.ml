@@ -225,7 +225,7 @@ let move canvas =
   let ball_lst = ball_locations (!cur_state) in
   cur_state := update_cue_ball_velocity !cur_state ((speed *. (cos (!stick_angle+.pi))),
     (speed *. (sin (!stick_angle+.pi))));
-  (*cur_state := (get_logic !cur_state, List.map 
+  (*cur_state := (get_logic !cur_state, List.map
     (fun b -> if get_id b = 0 then change_velocity b move else b ) ball_lst);*)
   power := 0.0;
   cur_mode := SIMULATE;
@@ -308,6 +308,8 @@ let mouseup canvas event =
   end
   | _ -> Js._false
 
+let event_list = ref []
+
 let rec loop canvas =
   draw canvas;
   let logic = get_logic !cur_state in
@@ -315,9 +317,15 @@ let rec loop canvas =
   let tdelta = 0.001 in
   let _ = match !cur_mode with
   | SIMULATE -> let ball_lst = ball_locations (!cur_state) in
-                if is_converged ball_lst then cur_mode := PTURN
-                else
-                 cur_state := (logic, fst (simulate_timestep ball_lst tdelta));
+    let (physics, events) = simulate_timestep ball_lst tdelta in
+    if is_converged ball_lst
+    then begin cur_state := (EightBall.next_state logic (!event_list), physics);
+        event_list := [];
+        cur_mode := PTURN
+      end
+    else
+      cur_state := (logic, physics);
+      event_list := List.append events !event_list;
   | SCRATCH -> ()
   | PTURN -> ()
   | GAMEOVER -> ()
