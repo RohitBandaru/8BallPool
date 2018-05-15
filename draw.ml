@@ -220,6 +220,13 @@ let draw canvas =
   ()
 
 let move canvas =
+  Firebug.console##log (Printf.sprintf "move %f" !power);
+  let move = (!power*.1000.,!stick_angle) in
+  let ball_lst = ball_locations (!cur_state) in
+  cur_state := (get_logic !cur_state, List.map 
+    (fun b -> if get_id b = 0 then change_velocity b move else b ) ball_lst);
+  power := 0.0;
+  cur_mode := SIMULATE;
   ()
 
 let keydown canvas event =
@@ -302,10 +309,23 @@ let mouseup canvas event =
 
 let rec loop canvas =
   draw canvas;
+  let balls = get_balls !cur_state in
+        List.iter
+        (fun b -> debug (Printf.sprintf
+          "[id: %d, xcor %f, ycor %f]\n" (get_id b) (fst (get_position b)) (snd (get_position b))) ) balls;
+        debug "/////////////////////////////////////////////////////////////////";
   let logic = get_logic !cur_state in
   let balls = get_balls !cur_state in
   let tdelta = 0.001 in
-  (* cur_state := (logic, fst simulate_timestep balls); *)
+  let _ = match !cur_mode with
+  | SIMULATE -> let ball_lst = ball_locations (!cur_state) in
+                if is_converged ball_lst then cur_mode := SIMULATE
+                else
+                 cur_state := (logic, fst (simulate_timestep ball_lst tdelta));
+  | SCRATCH -> ()
+  | PTURN -> ()
+  | GAMEOVER -> ()
+  in
   Html.window##requestAnimationFrame(
     Js.wrap_callback (fun (t:float) -> loop canvas)) |> ignore
 
